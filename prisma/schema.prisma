@@ -23,17 +23,22 @@ model User {
 }
 
 model Card {
-  id             String             @id @default(uuid())
-  title          String
-  description    String?
-  status         CardStatus         @default(ACTIVE)
-  qrCode         String             @unique
-  ownerId        String
-  owner          User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  offers         Offer[]
-  transactions   Transaction[]
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  id                String             @id @default(uuid())
+  title             String
+  description       String?
+  status            CardStatus         @default(INACTIVE)
+  cardNumber        String             @unique
+  qrCode            String             @unique
+  activationCode    String             @unique
+  purchaseReference String             @unique
+  price             Decimal            @db.Decimal(10, 2)
+  activatedAt       DateTime?
+  ownerId           String
+  owner             User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  offers            Offer[]
+  transactions      Transaction[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 }
 
 model Offer {
@@ -89,6 +94,3 @@ enum TransactionStatus {
   FAILED
   CANCELLED
 }
-
-
-
