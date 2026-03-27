@@ -1,9 +1,28 @@
-async function listUsers(_req, res) {
-  res.status(200).json({
-    success: true,
-    message: 'Users endpoint ready',
-    data: [],
-  });
+const { createSuccessResponse } = require('../../utils/api-response');
+
+async function listUsers(req, res) {
+  const users = await req.container.userService.listUsers();
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Users fetched successfully',
+      data: users,
+    }),
+  );
 }
 
-module.exports = { listUsers };
+async function listMerchants(req, res) {
+  const merchants = await req.container.userService.listMerchants();
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Merchants fetched successfully',
+      data: merchants,
+    }),
+  );
+}
+
+module.exports = {
+  listUsers,
+  listMerchants,
+};

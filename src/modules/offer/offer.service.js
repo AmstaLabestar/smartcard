@@ -19,6 +19,10 @@ class OfferService {
     return this.offerRepository.findActiveOffers();
   }
 
+  async listAllOffers() {
+    return this.offerRepository.findAllOffers();
+  }
+
   async listMyOffers(creatorId) {
     return this.offerRepository.findOffersByCreatorId(creatorId);
   }

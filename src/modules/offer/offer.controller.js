@@ -25,6 +25,17 @@ async function listOffers(req, res) {
   );
 }
 
+async function listAllOffers(req, res) {
+  const offers = await req.container.offerService.listAllOffers();
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'All offers fetched successfully',
+      data: offers,
+    }),
+  );
+}
+
 async function listMyOffers(req, res) {
   const offers = await req.container.offerService.listMyOffers(req.user.sub);
 
@@ -54,6 +65,7 @@ async function updateOfferStatus(req, res) {
 module.exports = {
   createOffer,
   listOffers,
+  listAllOffers,
   listMyOffers,
   updateOfferStatus,
 };

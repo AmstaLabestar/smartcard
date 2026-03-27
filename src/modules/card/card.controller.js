@@ -39,8 +39,20 @@ async function getMyCard(req, res) {
   );
 }
 
+async function listAllCards(req, res) {
+  const cards = await req.container.cardService.listAllCards();
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Cards fetched successfully',
+      data: cards,
+    }),
+  );
+}
+
 module.exports = {
   purchaseCard,
   activateCard,
   getMyCard,
+  listAllCards,
 };

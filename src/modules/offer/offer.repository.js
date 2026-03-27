@@ -42,6 +42,26 @@ class OfferRepository {
     });
   }
 
+  async findAllOffers() {
+    return prisma.offer.findMany({
+      include: {
+        creator: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   async findOffersByCreatorId(creatorId) {
     return prisma.offer.findMany({
       where: { creatorId },

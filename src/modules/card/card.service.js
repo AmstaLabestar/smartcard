@@ -68,6 +68,10 @@ class CardService {
 
     return card;
   }
+
+  async listAllCards() {
+    return this.cardRepository.findAllCards();
+  }
 }
 
 module.exports = { CardService };

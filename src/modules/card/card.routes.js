@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { authMiddleware } = require('../../middlewares/auth.middleware');
+const { authMiddleware, requireRole } = require('../../middlewares/auth.middleware');
 const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
 const cardController = require('./card.controller');
@@ -33,5 +33,6 @@ router.post(
 );
 
 router.get('/me', asyncHandler(async (req, res) => cardController.getMyCard(req, res)));
+router.get('/admin/all', requireRole('ADMIN'), asyncHandler(async (req, res) => cardController.listAllCards(req, res)));
 
 module.exports = router;
