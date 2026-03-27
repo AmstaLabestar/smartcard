@@ -10,6 +10,7 @@ function errorMiddleware(error, _req, res, _next) {
   res.status(statusCode).json({
     success: false,
     message: error.message || 'Internal server error',
+    ...(error.details && { details: error.details }),
     ...(process.env.NODE_ENV !== 'production' && { stack: error.stack }),
   });
 }

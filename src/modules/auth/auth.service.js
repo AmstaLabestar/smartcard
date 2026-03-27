@@ -27,6 +27,7 @@ class AuthService {
       passwordHash,
       firstName: payload.firstName,
       lastName: payload.lastName,
+      role: payload.role || 'USER',
     });
 
     return {
@@ -69,6 +70,18 @@ class AuthService {
         role: user.role,
       }),
     };
+  }
+
+  async getProfile(userId) {
+    const user = await this.authRepository.findById(userId);
+
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    return this.authRepository.toPublicUser(user);
   }
 }
 

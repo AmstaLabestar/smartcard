@@ -1,5 +1,6 @@
 const express = require('express');
 
+const { authMiddleware } = require('../../middlewares/auth.middleware');
 const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
 const { authRegisterSchema, authLoginSchema } = require('./auth.validation');
@@ -28,5 +29,7 @@ router.post(
     return authController.login(req, res);
   }),
 );
+
+router.get('/me', authMiddleware, asyncHandler(async (req, res) => authController.me(req, res)));
 
 module.exports = router;

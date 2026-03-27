@@ -12,6 +12,12 @@ class AuthRepository {
     });
   }
 
+  async findById(id) {
+    return prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
   async createUser(data) {
     const user = await prisma.user.create({
       data,
