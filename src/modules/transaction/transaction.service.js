@@ -1,4 +1,9 @@
 const { generateTransactionReference } = require('../../utils/identifiers');
+const { AppError } = require('../../utils/app-error');
+
+const MAX_ALLOWED_AMOUNT = 100000;
+const ABNORMAL_AMOUNT_THRESHOLD = 5000;
+const DUPLICATE_SCAN_WINDOW_MS = 60000;
 
 class TransactionService {
   constructor({ transactionRepository }) {
@@ -9,41 +14,80 @@ class TransactionService {
     const card = await this.transactionRepository.findCardByQrCode(payload.qrCode);
 
     if (!card) {
-      const error = new Error('Card not found');
-      error.statusCode = 404;
-      throw error;
+      throw new AppError('Card not found', 404, 'CARD_NOT_FOUND');
     }
 
     if (card.status !== 'ACTIVE') {
-      const error = new Error('Card is not active');
-      error.statusCode = 400;
-      throw error;
+      throw new AppError('Card is not active', 400, 'CARD_NOT_ACTIVE');
+    }
+
+    if (!card.owner || card.owner.role !== 'USER') {
+      throw new AppError('Card owner is invalid', 400, 'INVALID_CARD_OWNER');
     }
 
     const offer = await this.transactionRepository.findOfferById(payload.offerId);
 
     if (!offer) {
-      const error = new Error('Offer not found');
-      error.statusCode = 404;
-      throw error;
+      throw new AppError('Offer not found', 404, 'OFFER_NOT_FOUND');
     }
 
     if (offer.status !== 'ACTIVE') {
-      const error = new Error('Offer is not active');
-      error.statusCode = 400;
-      throw error;
+      throw new AppError('Offer is not active', 400, 'OFFER_NOT_ACTIVE');
     }
 
     const isAdmin = requester.role === 'ADMIN';
     const isOwnerMerchant = offer.creatorId === requester.sub;
 
     if (!isAdmin && !isOwnerMerchant) {
-      const error = new Error('Forbidden');
-      error.statusCode = 403;
-      throw error;
+      throw new AppError('Forbidden', 403, 'FORBIDDEN');
     }
 
     const originalAmount = Number(payload.originalAmount);
+
+    if (originalAmount <= 0) {
+      throw new AppError('Amount must be greater than zero', 400, 'INVALID_AMOUNT');
+    }
+
+    if (originalAmount > MAX_ALLOWED_AMOUNT) {
+      console.warn(
+        JSON.stringify({
+          event: 'transaction_abnormal_amount',
+          merchantId: requester.sub,
+          cardId: card.id,
+          offerId: offer.id,
+          originalAmount,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+
+      throw new AppError('Amount exceeds the allowed limit', 400, 'AMOUNT_LIMIT_EXCEEDED');
+    }
+
+    if (originalAmount >= ABNORMAL_AMOUNT_THRESHOLD) {
+      console.warn(
+        JSON.stringify({
+          event: 'transaction_high_amount_warning',
+          merchantId: requester.sub,
+          cardId: card.id,
+          offerId: offer.id,
+          originalAmount,
+          timestamp: new Date().toISOString(),
+        }),
+      );
+    }
+
+    const duplicateWindowStart = new Date(Date.now() - DUPLICATE_SCAN_WINDOW_MS);
+    const duplicateTransaction = await this.transactionRepository.findRecentDuplicateTransaction({
+      cardId: card.id,
+      offerId: offer.id,
+      originalAmount,
+      duplicateWindowStart,
+    });
+
+    if (duplicateTransaction) {
+      throw new AppError('Duplicate scan detected. Please wait before scanning again.', 409, 'DUPLICATE_SCAN_DETECTED');
+    }
+
     let discountAmount = 0;
 
     if (offer.discountType === 'PERCENTAGE') {
@@ -55,7 +99,7 @@ class TransactionService {
     discountAmount = Math.min(discountAmount, originalAmount);
     const finalAmount = Math.max(originalAmount - discountAmount, 0);
 
-    return this.transactionRepository.createTransaction({
+    const transaction = await this.transactionRepository.createTransaction({
       originalAmount,
       discountAmount,
       amount: finalAmount,
@@ -65,6 +109,21 @@ class TransactionService {
       offerId: offer.id,
       reference: generateTransactionReference(),
     });
+
+    console.info(
+      JSON.stringify({
+        event: 'transaction_created',
+        userId: card.ownerId,
+        merchantId: offer.creatorId,
+        offerId: offer.id,
+        amount: finalAmount,
+        originalAmount,
+        discountAmount,
+        timestamp: new Date().toISOString(),
+      }),
+    );
+
+    return transaction;
   }
 
   async listMyTransactions(userId) {
@@ -73,9 +132,7 @@ class TransactionService {
 
   async listMerchantTransactions(requester) {
     if (requester.role === 'ADMIN') {
-      const error = new Error('Admin merchant listing is not implemented yet');
-      error.statusCode = 400;
-      throw error;
+      throw new AppError('Admin merchant listing is not implemented yet', 400, 'ADMIN_LISTING_NOT_IMPLEMENTED');
     }
 
     return this.transactionRepository.findTransactionsByMerchantId(requester.sub);

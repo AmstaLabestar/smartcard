@@ -4,6 +4,7 @@ const {
   generatePurchaseReference,
   generateQrCodeValue,
 } = require('../../utils/identifiers');
+const { AppError } = require('../../utils/app-error');
 
 class CardService {
   constructor({ cardRepository }) {
@@ -14,9 +15,7 @@ class CardService {
     const existingCard = await this.cardRepository.findCurrentUserCard(ownerId);
 
     if (existingCard) {
-      const error = new Error('User already has a card');
-      error.statusCode = 409;
-      throw error;
+      throw new AppError('User already has a card', 409, 'CARD_ALREADY_EXISTS');
     }
 
     return this.cardRepository.createCard({
@@ -39,9 +38,7 @@ class CardService {
     });
 
     if (!card) {
-      const error = new Error('Card not found for this activation code');
-      error.statusCode = 404;
-      throw error;
+      throw new AppError('Card not found for this activation code', 404, 'CARD_NOT_FOUND');
     }
 
     if (card.status === 'ACTIVE') {
@@ -49,9 +46,7 @@ class CardService {
     }
 
     if (card.status === 'ARCHIVED') {
-      const error = new Error('Archived cards cannot be activated');
-      error.statusCode = 400;
-      throw error;
+      throw new AppError('Archived cards cannot be activated', 400, 'CARD_ARCHIVED');
     }
 
     return this.cardRepository.activateCard(card.id);
@@ -61,9 +56,7 @@ class CardService {
     const card = await this.cardRepository.findCurrentUserCard(ownerId);
 
     if (!card) {
-      const error = new Error('No card found for this user');
-      error.statusCode = 404;
-      throw error;
+      throw new AppError('No card found for this user', 404, 'CARD_NOT_FOUND');
     }
 
     return card;

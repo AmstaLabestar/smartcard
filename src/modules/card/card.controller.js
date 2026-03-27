@@ -1,4 +1,5 @@
 const { createSuccessResponse } = require('../../utils/api-response');
+const { sanitizeCard } = require('../../utils/serializers');
 
 async function purchaseCard(req, res) {
   const card = await req.container.cardService.purchaseCard({
@@ -9,7 +10,10 @@ async function purchaseCard(req, res) {
   res.status(201).json(
     createSuccessResponse({
       message: 'Card purchased successfully',
-      data: card,
+      data: sanitizeCard(card, {
+        includeQrCode: true,
+        includeSensitiveReferences: true,
+      }),
     }),
   );
 }
@@ -23,7 +27,7 @@ async function activateCard(req, res) {
   res.status(200).json(
     createSuccessResponse({
       message: 'Card activated successfully',
-      data: card,
+      data: sanitizeCard(card, { includeQrCode: true }),
     }),
   );
 }
@@ -34,7 +38,7 @@ async function getMyCard(req, res) {
   res.status(200).json(
     createSuccessResponse({
       message: 'Card fetched successfully',
-      data: card,
+      data: sanitizeCard(card, { includeQrCode: true }),
     }),
   );
 }
@@ -45,7 +49,7 @@ async function listAllCards(req, res) {
   res.status(200).json(
     createSuccessResponse({
       message: 'Cards fetched successfully',
-      data: cards,
+      data: cards.map((card) => sanitizeCard(card)),
     }),
   );
 }

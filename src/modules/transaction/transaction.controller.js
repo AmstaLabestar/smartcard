@@ -1,4 +1,5 @@
 const { createSuccessResponse } = require('../../utils/api-response');
+const { sanitizeTransaction } = require('../../utils/serializers');
 
 async function scanTransaction(req, res) {
   const transaction = await req.container.transactionService.scanAndCreateTransaction({
@@ -9,7 +10,7 @@ async function scanTransaction(req, res) {
   res.status(201).json(
     createSuccessResponse({
       message: 'Transaction created successfully',
-      data: transaction,
+      data: sanitizeTransaction(transaction),
     }),
   );
 }
@@ -20,7 +21,7 @@ async function listMyTransactions(req, res) {
   res.status(200).json(
     createSuccessResponse({
       message: 'User transactions fetched successfully',
-      data: transactions,
+      data: transactions.map(sanitizeTransaction),
     }),
   );
 }
@@ -31,7 +32,7 @@ async function listMerchantTransactions(req, res) {
   res.status(200).json(
     createSuccessResponse({
       message: 'Merchant transactions fetched successfully',
-      data: transactions,
+      data: transactions.map(sanitizeTransaction),
     }),
   );
 }
