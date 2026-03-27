@@ -35,24 +35,24 @@ model Card {
   activatedAt       DateTime?
   ownerId           String
   owner             User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  offers            Offer[]
   transactions      Transaction[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 }
 
 model Offer {
-  id           String        @id @default(uuid())
-  title        String
-  description  String?
-  status       OfferStatus   @default(DRAFT)
-  cardId       String
-  creatorId    String
-  card         Card          @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  creator      User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id            String        @id @default(uuid())
+  title         String
+  description   String?
+  status        OfferStatus   @default(DRAFT)
+  discountType  DiscountType
+  discountValue Decimal       @db.Decimal(10, 2)
+  terms         String?
+  creatorId     String
+  creator       User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model Transaction {
@@ -86,6 +86,11 @@ enum OfferStatus {
   DRAFT
   ACTIVE
   EXPIRED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
 }
 
 enum TransactionStatus {
