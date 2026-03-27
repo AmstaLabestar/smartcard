@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String?       @unique
+  phoneNumber  String?       @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  role         UserRole      @default(USER)
+  cards        Card[]
+  offers       Offer[]
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Card {
+  id             String             @id @default(uuid())
+  title          String
+  description    String?
+  status         CardStatus         @default(ACTIVE)
+  qrCode         String             @unique
+  ownerId        String
+  owner          User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  offers         Offer[]
+  transactions   Transaction[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model Offer {
+  id           String        @id @default(uuid())
+  title        String
+  description  String?
+  status       OfferStatus   @default(DRAFT)
+  cardId       String
+  creatorId    String
+  card         Card          @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  creator      User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String            @id @default(uuid())
+  amount      Decimal           @db.Decimal(10, 2)
+  status      TransactionStatus @default(PENDING)
+  userId      String
+  cardId      String
+  offerId     String?
+  reference   String            @unique
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card        Card              @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  offer       Offer?            @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum CardStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum OfferStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
