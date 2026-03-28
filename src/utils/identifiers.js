@@ -16,9 +16,14 @@ function generatePurchaseReference() {
   return `PUR-${uuidv4().replace(/-/g, '').slice(0, 10).toUpperCase()}`;
 }
 
+function generateTransactionReference() {
+  return `TXN-${uuidv4().replace(/-/g, '').slice(0, 12).toUpperCase()}`;
+}
+
 module.exports = {
   generateActivationCode,
   generateCardNumber,
   generatePurchaseReference,
   generateQrCodeValue,
+  generateTransactionReference,
 };

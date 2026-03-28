@@ -56,18 +56,20 @@ model Offer {
 }
 
 model Transaction {
-  id          String            @id @default(uuid())
-  amount      Decimal           @db.Decimal(10, 2)
-  status      TransactionStatus @default(PENDING)
-  userId      String
-  cardId      String
-  offerId     String?
-  reference   String            @unique
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  card        Card              @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  offer       Offer?            @relation(fields: [offerId], references: [id], onDelete: SetNull)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id             String            @id @default(uuid())
+  originalAmount Decimal           @db.Decimal(10, 2)
+  discountAmount Decimal           @db.Decimal(10, 2)
+  amount         Decimal           @db.Decimal(10, 2)
+  status         TransactionStatus @default(PENDING)
+  userId         String
+  cardId         String
+  offerId        String?
+  reference      String            @unique
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card           Card              @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  offer          Offer?            @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 }
 
 enum UserRole {
