@@ -14,6 +14,7 @@ const authRegisterSchema = z
     password: z.string().min(8).max(72),
     firstName: z.string().min(1).max(100).optional(),
     lastName: z.string().min(1).max(100).optional(),
+    role: z.enum(['USER', 'MERCHANT']).optional(),
   })
   .refine((data) => Boolean(data.email || data.phoneNumber), {
     message: 'Email or phone number is required',

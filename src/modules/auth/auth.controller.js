@@ -22,7 +22,19 @@ async function login(req, res) {
   );
 }
 
+async function me(req, res) {
+  const result = await req.container.authService.getProfile(req.user.sub);
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Authenticated user fetched successfully',
+      data: result,
+    }),
+  );
+}
+
 module.exports = {
   register,
   login,
+  me,
 };

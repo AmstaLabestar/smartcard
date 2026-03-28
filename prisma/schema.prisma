@@ -67,6 +67,7 @@ model Transaction {
 
 enum UserRole {
   USER
+  MERCHANT
   ADMIN
 }
 
@@ -88,4 +89,6 @@ enum TransactionStatus {
   FAILED
   CANCELLED
 }
+
+
 
