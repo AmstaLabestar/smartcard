@@ -1,14 +1,13 @@
 const { ZodError } = require('zod');
 
+const { AppError } = require('./app-error');
+
 function validate(schema, data) {
   try {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof ZodError) {
-      const validationError = new Error('Validation failed');
-      validationError.statusCode = 400;
-      validationError.details = error.flatten();
-      throw validationError;
+      throw new AppError('Validation failed', 400, 'VALIDATION_ERROR', error.flatten());
     }
 
     throw error;

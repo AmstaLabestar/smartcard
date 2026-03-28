@@ -24,6 +24,26 @@ class CardRepository {
     });
   }
 
+  async findAllCards() {
+    return prisma.card.findMany({
+      include: {
+        owner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   async createCard(data) {
     return prisma.card.create({
       data,

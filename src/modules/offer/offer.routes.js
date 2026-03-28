@@ -15,6 +15,7 @@ router.use((req, _res, next) => {
 });
 
 router.get('/', authMiddleware, asyncHandler(async (req, res) => offerController.listOffers(req, res)));
+router.get('/admin/all', authMiddleware, requireRole('ADMIN'), asyncHandler(async (req, res) => offerController.listAllOffers(req, res)));
 
 router.get(
   '/mine',

@@ -1,9 +1,23 @@
-function createSuccessResponse({ message, data = null }) {
+function createSuccessResponse({ message = '', data = null }) {
   return {
     success: true,
-    message,
     data,
+    message,
   };
 }
 
-module.exports = { createSuccessResponse };
+function createErrorResponse({ message = 'Internal server error', code = 'INTERNAL_SERVER_ERROR', details = null }) {
+  return {
+    success: false,
+    error: {
+      message,
+      code,
+      ...(details && { details }),
+    },
+  };
+}
+
+module.exports = {
+  createSuccessResponse,
+  createErrorResponse,
+};

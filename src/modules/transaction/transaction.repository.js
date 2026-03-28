@@ -13,6 +13,8 @@ class TransactionRepository {
             email: true,
             phoneNumber: true,
             role: true,
+            createdAt: true,
+            updatedAt: true,
           },
         },
       },
@@ -31,8 +33,27 @@ class TransactionRepository {
             email: true,
             phoneNumber: true,
             role: true,
+            createdAt: true,
+            updatedAt: true,
           },
         },
+      },
+    });
+  }
+
+  async findRecentDuplicateTransaction({ cardId, offerId, originalAmount, duplicateWindowStart }) {
+    return prisma.transaction.findFirst({
+      where: {
+        cardId,
+        offerId,
+        originalAmount,
+        status: 'COMPLETED',
+        createdAt: {
+          gte: duplicateWindowStart,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
@@ -49,6 +70,8 @@ class TransactionRepository {
             email: true,
             phoneNumber: true,
             role: true,
+            createdAt: true,
+            updatedAt: true,
           },
         },
         card: true,
@@ -62,6 +85,8 @@ class TransactionRepository {
                 email: true,
                 phoneNumber: true,
                 role: true,
+                createdAt: true,
+                updatedAt: true,
               },
             },
           },
@@ -85,6 +110,8 @@ class TransactionRepository {
                 email: true,
                 phoneNumber: true,
                 role: true,
+                createdAt: true,
+                updatedAt: true,
               },
             },
           },
@@ -112,10 +139,27 @@ class TransactionRepository {
             email: true,
             phoneNumber: true,
             role: true,
+            createdAt: true,
+            updatedAt: true,
           },
         },
         card: true,
-        offer: true,
+        offer: {
+          include: {
+            creator: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                phoneNumber: true,
+                role: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
