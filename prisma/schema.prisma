@@ -23,37 +23,41 @@ model User {
 }
 
 model Card {
-  id                String             @id @default(uuid())
-  title             String
-  description       String?
-  status            CardStatus         @default(INACTIVE)
-  cardNumber        String             @unique
-  qrCode            String             @unique
-  activationCode    String             @unique
-  purchaseReference String             @unique
-  price             Decimal            @db.Decimal(10, 2)
-  activatedAt       DateTime?
-  cardPlanId        String?
-  cardPlan          CardPlan?          @relation(fields: [cardPlanId], references: [id], onDelete: SetNull)
-  ownerId           String
-  owner             User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  transactions      Transaction[]
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id                       String     @id @default(uuid())
+  title                    String
+  description              String?
+  planNameSnapshot         String?
+  planDescriptionSnapshot  String?
+  planHighlightsSnapshot   String?
+  planPriceSnapshot        Decimal?   @db.Decimal(10, 2)
+  status                   CardStatus @default(INACTIVE)
+  cardNumber               String     @unique
+  qrCode                   String     @unique
+  activationCode           String     @unique
+  purchaseReference        String     @unique
+  price                    Decimal    @db.Decimal(10, 2)
+  activatedAt              DateTime?
+  cardPlanId               String?
+  cardPlan                 CardPlan?  @relation(fields: [cardPlanId], references: [id], onDelete: SetNull)
+  ownerId                  String
+  owner                    User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  transactions             Transaction[]
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
 }
 
 model CardPlan {
-  id                  String           @id @default(uuid())
+  id                  String         @id @default(uuid())
   name                String
-  slug                String           @unique
+  slug                String         @unique
   description         String?
   marketingHighlights String?
-  price               Decimal          @db.Decimal(10, 2)
-  status              CardPlanStatus   @default(DRAFT)
+  price               Decimal        @db.Decimal(10, 2)
+  status              CardPlanStatus @default(DRAFT)
   cards               Card[]
   offerLinks          CardPlanOffer[]
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 }
 
 model CardPlanOffer {
@@ -107,8 +111,10 @@ enum UserRole {
 }
 
 enum CardStatus {
+  PENDING
   ACTIVE
   INACTIVE
+  EXPIRED
   ARCHIVED
 }
 

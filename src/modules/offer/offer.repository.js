@@ -36,25 +36,20 @@ class OfferRepository {
   }
 
   async findActiveOffersByUserId(userId) {
-    const userCard = await prisma.card.findFirst({
+    const activeCard = await prisma.card.findFirst({
       where: {
         ownerId: userId,
-        status: {
-          not: 'ARCHIVED',
-        },
+        status: 'ACTIVE',
         cardPlanId: {
           not: null,
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
       },
       select: {
         cardPlanId: true,
       },
     });
 
-    if (!userCard?.cardPlanId) {
+    if (!activeCard?.cardPlanId) {
       return [];
     }
 
@@ -63,7 +58,7 @@ class OfferRepository {
         status: 'ACTIVE',
         cardPlanLinks: {
           some: {
-            cardPlanId: userCard.cardPlanId,
+            cardPlanId: activeCard.cardPlanId,
           },
         },
       },

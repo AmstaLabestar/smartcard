@@ -18,10 +18,18 @@ class MeService {
   }
 
   async getCurrentUserCard(userId) {
-    const card = await this.cardRepository.findCurrentUserCard(userId);
+    return this.getCurrentUserActiveCard(userId);
+  }
+
+  async getCurrentUserCards(userId) {
+    return this.cardRepository.findCardsByOwnerId(userId);
+  }
+
+  async getCurrentUserActiveCard(userId) {
+    const card = await this.cardRepository.findActiveUserCard(userId);
 
     if (!card) {
-      throw new AppError('No card found for this user', 404, 'CARD_NOT_FOUND');
+      throw new AppError('No active card found for this user', 404, 'CARD_NOT_FOUND');
     }
 
     return card;

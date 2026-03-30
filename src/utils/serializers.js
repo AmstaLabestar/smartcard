@@ -51,6 +51,21 @@ function sanitizeCard(card, options = {}) {
   if (!card) return null;
 
   const { includeQrCode = false, includeSensitiveReferences = false } = options;
+  const cardPlanSummary = card.cardPlan || card.planNameSnapshot || card.planPriceSnapshot
+    ? {
+        id: card.cardPlan?.id || card.cardPlanId || null,
+        name: card.planNameSnapshot || card.cardPlan?.name || card.title,
+        slug: card.cardPlan?.slug || null,
+        description: card.planDescriptionSnapshot || card.cardPlan?.description || card.description,
+        marketingHighlights:
+          card.planHighlightsSnapshot || card.cardPlan?.marketingHighlights || null,
+        price: card.planPriceSnapshot || card.cardPlan?.price || card.price,
+        status: card.cardPlan?.status || null,
+        offers: (card.cardPlan?.offerLinks || []).map((link) => sanitizeOffer(link.offer)),
+        createdAt: card.cardPlan?.createdAt || null,
+        updatedAt: card.cardPlan?.updatedAt || null,
+      }
+    : null;
 
   return {
     id: card.id,
@@ -67,7 +82,7 @@ function sanitizeCard(card, options = {}) {
     activatedAt: card.activatedAt,
     createdAt: card.createdAt,
     updatedAt: card.updatedAt,
-    ...(card.cardPlan && { cardPlan: sanitizeCardPlan(card.cardPlan) }),
+    ...(cardPlanSummary && { cardPlan: cardPlanSummary }),
     ...(card.owner && { owner: sanitizeUser(card.owner) }),
   };
 }
