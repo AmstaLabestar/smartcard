@@ -16,7 +16,7 @@ function authMiddleware(req, _res, next) {
     const payload = jwt.verify(token, env.JWT_SECRET);
     req.user = payload;
     return next();
-  } catch (_error) {
+  } catch {
     return next(new AppError('Invalid or expired token', 401, 'INVALID_TOKEN'));
   }
 }
