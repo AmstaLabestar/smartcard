@@ -23,36 +23,81 @@ model User {
 }
 
 model Card {
-  id                String             @id @default(uuid())
-  title             String
-  description       String?
-  status            CardStatus         @default(INACTIVE)
-  cardNumber        String             @unique
-  qrCode            String             @unique
-  activationCode    String             @unique
-  purchaseReference String             @unique
-  price             Decimal            @db.Decimal(10, 2)
-  activatedAt       DateTime?
-  ownerId           String
-  owner             User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  transactions      Transaction[]
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id                       String           @id @default(uuid())
+  title                    String
+  description              String?
+  planNameSnapshot         String?
+  planDescriptionSnapshot  String?
+  planHighlightsSnapshot   String?
+  planPriceSnapshot        Decimal?         @db.Decimal(10, 2)
+  status                   CardStatus       @default(INACTIVE)
+  cardNumber               String           @unique
+  qrCode                   String           @unique
+  activationCode           String           @unique
+  purchaseReference        String           @unique
+  price                    Decimal          @db.Decimal(10, 2)
+  activatedAt              DateTime?
+  cardPlanId               String?
+  cardPlan                 CardPlan?        @relation(fields: [cardPlanId], references: [id], onDelete: SetNull)
+  ownerId                  String
+  owner                    User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  offerAccesses            CardOfferAccess[]
+  transactions             Transaction[]
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+}
+
+model CardPlan {
+  id                  String         @id @default(uuid())
+  name                String
+  slug                String         @unique
+  description         String?
+  marketingHighlights String?
+  price               Decimal        @db.Decimal(10, 2)
+  status              CardPlanStatus @default(DRAFT)
+  cards               Card[]
+  offerLinks          CardPlanOffer[]
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+}
+
+model CardPlanOffer {
+  id         String   @id @default(uuid())
+  cardPlanId String
+  offerId    String
+  cardPlan   CardPlan @relation(fields: [cardPlanId], references: [id], onDelete: Cascade)
+  offer      Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([cardPlanId, offerId])
+}
+
+model CardOfferAccess {
+  id        String   @id @default(uuid())
+  cardId    String
+  offerId   String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([cardId, offerId])
 }
 
 model Offer {
-  id            String        @id @default(uuid())
-  title         String
-  description   String?
-  status        OfferStatus   @default(DRAFT)
-  discountType  DiscountType
-  discountValue Decimal       @db.Decimal(10, 2)
-  terms         String?
-  creatorId     String
-  creator       User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  transactions  Transaction[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id              String            @id @default(uuid())
+  title           String
+  description     String?
+  status          OfferStatus       @default(DRAFT)
+  discountType    DiscountType
+  discountValue   Decimal           @db.Decimal(10, 2)
+  terms           String?
+  creatorId       String
+  creator         User              @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  cardPlanLinks   CardPlanOffer[]
+  cardAccessLinks CardOfferAccess[]
+  transactions    Transaction[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 model Transaction {
@@ -79,8 +124,16 @@ enum UserRole {
 }
 
 enum CardStatus {
+  PENDING
   ACTIVE
   INACTIVE
+  EXPIRED
+  ARCHIVED
+}
+
+enum CardPlanStatus {
+  DRAFT
+  ACTIVE
   ARCHIVED
 }
 

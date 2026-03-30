@@ -1,10 +1,83 @@
 const prisma = require('../../config/prisma');
 
+const offerCreatorSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  role: true,
+};
+
+const offerWithCreatorInclude = {
+  creator: {
+    select: offerCreatorSelect,
+  },
+};
+
+const cardInclude = {
+  cardPlan: {
+    include: {
+      offerLinks: {
+        include: {
+          offer: {
+            include: offerWithCreatorInclude,
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+  },
+  offerAccesses: {
+    include: {
+      offer: {
+        include: offerWithCreatorInclude,
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  },
+};
+
 class CardRepository {
-  async findCurrentUserCard(ownerId) {
+  async findActiveUserCard(ownerId) {
     return prisma.card.findFirst({
       where: {
         ownerId,
+        status: 'ACTIVE',
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      include: cardInclude,
+    });
+  }
+
+  async findCurrentUserCard(ownerId) {
+    return this.findActiveUserCard(ownerId);
+  }
+
+  async findCardsByOwnerId(ownerId) {
+    return prisma.card.findMany({
+      where: {
+        ownerId,
+        status: {
+          not: 'ARCHIVED',
+        },
+      },
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
+      include: cardInclude,
+    });
+  }
+
+  async findOwnedCardByPlan({ ownerId, cardPlanId }) {
+    return prisma.card.findFirst({
+      where: {
+        ownerId,
+        cardPlanId,
         status: {
           not: 'ARCHIVED',
         },
@@ -12,6 +85,17 @@ class CardRepository {
       orderBy: {
         createdAt: 'desc',
       },
+      include: cardInclude,
+    });
+  }
+
+  async findCardByIdAndOwnerId({ cardId, ownerId }) {
+    return prisma.card.findFirst({
+      where: {
+        id: cardId,
+        ownerId,
+      },
+      include: cardInclude,
     });
   }
 
@@ -20,22 +104,20 @@ class CardRepository {
       where: {
         ownerId,
         activationCode,
+        status: {
+          not: 'ARCHIVED',
+        },
       },
+      include: cardInclude,
     });
   }
 
   async findAllCards() {
     return prisma.card.findMany({
       include: {
+        ...cardInclude,
         owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-          },
+          select: offerCreatorSelect,
         },
       },
       orderBy: {
@@ -44,20 +126,73 @@ class CardRepository {
     });
   }
 
-  async createCard(data) {
-    return prisma.card.create({
-      data,
+  async findActiveCardPlanById(cardPlanId) {
+    return prisma.cardPlan.findFirst({
+      where: {
+        id: cardPlanId,
+        status: 'ACTIVE',
+      },
+      include: {
+        offerLinks: {
+          include: {
+            offer: {
+              include: offerWithCreatorInclude,
+            },
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
     });
   }
 
-  async activateCard(cardId) {
-    return prisma.card.update({
-      where: { id: cardId },
+  async createCard(data) {
+    const { offerAccessOfferIds = [], ...cardData } = data;
+
+    return prisma.card.create({
       data: {
-        status: 'ACTIVE',
-        activatedAt: new Date(),
+        ...cardData,
+        offerAccesses:
+          offerAccessOfferIds.length > 0
+            ? {
+                create: offerAccessOfferIds.map((offerId) => ({ offerId })),
+              }
+            : undefined,
       },
+      include: cardInclude,
     });
+  }
+
+  async activateCardForOwner({ ownerId, cardId }) {
+    const activatedAt = new Date();
+
+    const [, card] = await prisma.$transaction([
+      prisma.card.updateMany({
+        where: {
+          ownerId,
+          id: {
+            not: cardId,
+          },
+          status: {
+            in: ['ACTIVE', 'INACTIVE', 'PENDING'],
+          },
+        },
+        data: {
+          status: 'INACTIVE',
+        },
+      }),
+      prisma.card.update({
+        where: { id: cardId },
+        data: {
+          status: 'ACTIVE',
+          activatedAt,
+        },
+        include: cardInclude,
+      }),
+    ]);
+
+    return card;
   }
 }
 

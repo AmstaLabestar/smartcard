@@ -1,21 +1,25 @@
 const prisma = require('../../config/prisma');
 
+const creatorSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  role: true,
+};
+
+const offerInclude = {
+  creator: {
+    select: creatorSelect,
+  },
+};
+
 class OfferRepository {
   async createOffer(data) {
     return prisma.offer.create({
       data,
-      include: {
-        creator: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-          },
-        },
-      },
+      include: offerInclude,
     });
   }
 
@@ -24,18 +28,38 @@ class OfferRepository {
       where: {
         status: 'ACTIVE',
       },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
+      include: offerInclude,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async findActiveOffersByUserId(userId) {
+    const activeCard = await prisma.card.findFirst({
+      where: {
+        ownerId: userId,
+        status: 'ACTIVE',
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!activeCard?.id) {
+      return [];
+    }
+
+    return prisma.offer.findMany({
+      where: {
+        status: 'ACTIVE',
+        cardAccessLinks: {
+          some: {
+            cardId: activeCard.id,
           },
         },
       },
+      include: offerInclude,
       orderBy: {
         createdAt: 'desc',
       },
@@ -44,18 +68,7 @@ class OfferRepository {
 
   async findAllOffers() {
     return prisma.offer.findMany({
-      include: {
-        creator: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-          },
-        },
-      },
+      include: offerInclude,
       orderBy: {
         createdAt: 'desc',
       },
@@ -65,18 +78,7 @@ class OfferRepository {
   async findOffersByCreatorId(creatorId) {
     return prisma.offer.findMany({
       where: { creatorId },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-          },
-        },
-      },
+      include: offerInclude,
       orderBy: {
         createdAt: 'desc',
       },
@@ -86,18 +88,7 @@ class OfferRepository {
   async findById(id) {
     return prisma.offer.findUnique({
       where: { id },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-          },
-        },
-      },
+      include: offerInclude,
     });
   }
 
@@ -105,18 +96,7 @@ class OfferRepository {
     return prisma.offer.update({
       where: { id: offerId },
       data: { status },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-          },
-        },
-      },
+      include: offerInclude,
     });
   }
 }

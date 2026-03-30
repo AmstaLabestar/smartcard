@@ -15,6 +15,8 @@ router.use((req, _res, next) => {
 
 router.get('/', asyncHandler(async (req, res) => meController.getMe(req, res)));
 router.get('/card', asyncHandler(async (req, res) => meController.getMyCard(req, res)));
+router.get('/cards', asyncHandler(async (req, res) => meController.getMyCards(req, res)));
+router.get('/cards/active', asyncHandler(async (req, res) => meController.getMyActiveCard(req, res)));
 router.get('/transactions', asyncHandler(async (req, res) => meController.getMyTransactions(req, res)));
 
 module.exports = router;

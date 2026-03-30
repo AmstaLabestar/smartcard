@@ -19,9 +19,23 @@ async function purchaseCard(req, res) {
 }
 
 async function activateCard(req, res) {
-  const card = await req.container.cardService.activateCard({
+  const card = await req.container.cardService.activateCardByActivationCode({
     ownerId: req.user.sub,
     activationCode: req.body.activationCode,
+  });
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Card activated successfully',
+      data: sanitizeCard(card, { includeQrCode: true }),
+    }),
+  );
+}
+
+async function activateCardById(req, res) {
+  const card = await req.container.cardService.activateOwnedCard({
+    ownerId: req.user.sub,
+    cardId: req.params.cardId,
   });
 
   res.status(200).json(
@@ -43,6 +57,17 @@ async function getMyCard(req, res) {
   );
 }
 
+async function listMyCards(req, res) {
+  const cards = await req.container.cardService.listMyCards(req.user.sub);
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Cards fetched successfully',
+      data: cards.map((card) => sanitizeCard(card, { includeQrCode: true })),
+    }),
+  );
+}
+
 async function listAllCards(req, res) {
   const cards = await req.container.cardService.listAllCards();
 
@@ -57,6 +82,8 @@ async function listAllCards(req, res) {
 module.exports = {
   purchaseCard,
   activateCard,
+  activateCardById,
   getMyCard,
+  listMyCards,
   listAllCards,
 };

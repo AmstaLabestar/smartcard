@@ -1,3 +1,5 @@
+const { AppError } = require('../../utils/app-error');
+
 class OfferService {
   constructor({ offerRepository }) {
     this.offerRepository = offerRepository;
@@ -15,7 +17,11 @@ class OfferService {
     });
   }
 
-  async listActiveOffers() {
+  async listVisibleOffers(requester) {
+    if (requester.role === 'USER') {
+      return this.offerRepository.findActiveOffersByUserId(requester.sub);
+    }
+
     return this.offerRepository.findActiveOffers();
   }
 
@@ -31,18 +37,14 @@ class OfferService {
     const offer = await this.offerRepository.findById(offerId);
 
     if (!offer) {
-      const error = new Error('Offer not found');
-      error.statusCode = 404;
-      throw error;
+      throw new AppError('Offer not found', 404, 'OFFER_NOT_FOUND');
     }
 
     const isAdmin = requester.role === 'ADMIN';
     const isOwner = offer.creatorId === requester.sub;
 
     if (!isAdmin && !isOwner) {
-      const error = new Error('Forbidden');
-      error.statusCode = 403;
-      throw error;
+      throw new AppError('Forbidden', 403, 'FORBIDDEN');
     }
 
     return this.offerRepository.updateOfferStatus({
