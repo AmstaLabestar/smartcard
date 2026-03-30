@@ -15,7 +15,7 @@ async function createOffer(req, res) {
 }
 
 async function listOffers(req, res) {
-  const offers = await req.container.offerService.listActiveOffers();
+  const offers = await req.container.offerService.listVisibleOffers(req.user);
 
   res.status(200).json(
     createSuccessResponse({

@@ -26,6 +26,10 @@ class TransactionService {
       throw new AppError('Card owner is invalid', 400, 'INVALID_CARD_OWNER');
     }
 
+    if (!card.cardPlanId || !card.cardPlan) {
+      throw new AppError('Card plan is not configured for this card', 400, 'CARD_PLAN_NOT_CONFIGURED');
+    }
+
     const offer = await this.transactionRepository.findOfferById(payload.offerId);
 
     if (!offer) {
@@ -41,6 +45,12 @@ class TransactionService {
 
     if (!isAdmin && !isOwnerMerchant) {
       throw new AppError('Forbidden', 403, 'FORBIDDEN');
+    }
+
+    const allowedOfferIds = new Set((card.cardPlan.offerLinks || []).map((link) => link.offerId));
+
+    if (!allowedOfferIds.has(offer.id)) {
+      throw new AppError('This offer is not included in the customer card plan', 403, 'OFFER_NOT_ALLOWED_FOR_CARD_PLAN');
     }
 
     const originalAmount = Number(payload.originalAmount);
@@ -107,6 +117,7 @@ class TransactionService {
       userId: card.ownerId,
       merchantId: offer.creatorId,
       offerId: offer.id,
+      cardPlanId: card.cardPlanId,
       amount: finalAmount,
       originalAmount,
       discountAmount,

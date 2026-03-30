@@ -1,8 +1,7 @@
 const { z } = require('zod');
 
 const purchaseCardSchema = z.object({
-  title: z.string().min(3).max(100).default('SmartCard Reduction'),
-  description: z.string().max(255).optional(),
+  cardPlanId: z.string().uuid(),
 });
 
 const activateCardSchema = z.object({

@@ -13,6 +13,40 @@ function sanitizeUser(user) {
   };
 }
 
+function sanitizeOffer(offer) {
+  if (!offer) return null;
+
+  return {
+    id: offer.id,
+    title: offer.title,
+    description: offer.description,
+    status: offer.status,
+    discountType: offer.discountType,
+    discountValue: offer.discountValue,
+    terms: offer.terms,
+    createdAt: offer.createdAt,
+    updatedAt: offer.updatedAt,
+    ...(offer.creator && { creator: sanitizeUser(offer.creator) }),
+  };
+}
+
+function sanitizeCardPlan(cardPlan) {
+  if (!cardPlan) return null;
+
+  return {
+    id: cardPlan.id,
+    name: cardPlan.name,
+    slug: cardPlan.slug,
+    description: cardPlan.description,
+    marketingHighlights: cardPlan.marketingHighlights,
+    price: cardPlan.price,
+    status: cardPlan.status,
+    offers: (cardPlan.offerLinks || []).map((link) => sanitizeOffer(link.offer)),
+    createdAt: cardPlan.createdAt,
+    updatedAt: cardPlan.updatedAt,
+  };
+}
+
 function sanitizeCard(card, options = {}) {
   if (!card) return null;
 
@@ -33,24 +67,8 @@ function sanitizeCard(card, options = {}) {
     activatedAt: card.activatedAt,
     createdAt: card.createdAt,
     updatedAt: card.updatedAt,
+    ...(card.cardPlan && { cardPlan: sanitizeCardPlan(card.cardPlan) }),
     ...(card.owner && { owner: sanitizeUser(card.owner) }),
-  };
-}
-
-function sanitizeOffer(offer) {
-  if (!offer) return null;
-
-  return {
-    id: offer.id,
-    title: offer.title,
-    description: offer.description,
-    status: offer.status,
-    discountType: offer.discountType,
-    discountValue: offer.discountValue,
-    terms: offer.terms,
-    createdAt: offer.createdAt,
-    updatedAt: offer.updatedAt,
-    ...(offer.creator && { creator: sanitizeUser(offer.creator) }),
   };
 }
 
@@ -74,6 +92,7 @@ function sanitizeTransaction(transaction) {
 
 module.exports = {
   sanitizeUser,
+  sanitizeCardPlan,
   sanitizeCard,
   sanitizeOffer,
   sanitizeTransaction,

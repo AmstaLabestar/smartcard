@@ -1,20 +1,31 @@
 const prisma = require('../../config/prisma');
 
+const personSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  role: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
 class TransactionRepository {
   async findCardByQrCode(qrCode) {
     return prisma.card.findUnique({
       where: { qrCode },
       include: {
         owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
+          select: personSelect,
+        },
+        cardPlan: {
+          include: {
+            offerLinks: {
+              select: {
+                offerId: true,
+              },
+            },
           },
         },
       },
@@ -26,16 +37,7 @@ class TransactionRepository {
       where: { id: offerId },
       include: {
         creator: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
-          },
+          select: personSelect,
         },
       },
     });
@@ -63,31 +65,31 @@ class TransactionRepository {
       data,
       include: {
         user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
+          select: personSelect,
+        },
+        card: {
+          include: {
+            cardPlan: {
+              include: {
+                offerLinks: {
+                  include: {
+                    offer: {
+                      include: {
+                        creator: {
+                          select: personSelect,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
-        card: true,
         offer: {
           include: {
             creator: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                phoneNumber: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-              },
+              select: personSelect,
             },
           },
         },
@@ -99,20 +101,29 @@ class TransactionRepository {
     return prisma.transaction.findMany({
       where: { userId },
       include: {
-        card: true,
+        card: {
+          include: {
+            cardPlan: {
+              include: {
+                offerLinks: {
+                  include: {
+                    offer: {
+                      include: {
+                        creator: {
+                          select: personSelect,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
         offer: {
           include: {
             creator: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                phoneNumber: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-              },
+              select: personSelect,
             },
           },
         },
@@ -132,31 +143,31 @@ class TransactionRepository {
       },
       include: {
         user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
+          select: personSelect,
+        },
+        card: {
+          include: {
+            cardPlan: {
+              include: {
+                offerLinks: {
+                  include: {
+                    offer: {
+                      include: {
+                        creator: {
+                          select: personSelect,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
-        card: true,
         offer: {
           include: {
             creator: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                phoneNumber: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-              },
+              select: personSelect,
             },
           },
         },

@@ -18,15 +18,22 @@ class CardService {
       throw new AppError('User already has a card', 409, 'CARD_ALREADY_EXISTS');
     }
 
+    const cardPlan = await this.cardRepository.findActiveCardPlanById(payload.cardPlanId);
+
+    if (!cardPlan) {
+      throw new AppError('Card plan not found or inactive', 404, 'CARD_PLAN_NOT_FOUND');
+    }
+
     return this.cardRepository.createCard({
-      title: payload.title || 'SmartCard Reduction',
-      description: payload.description || 'Reduction card purchased from the platform',
+      title: cardPlan.name,
+      description: cardPlan.description || 'Reduction card purchased from the platform',
       status: 'INACTIVE',
       cardNumber: generateCardNumber(),
       qrCode: generateQrCodeValue(),
       activationCode: generateActivationCode(),
       purchaseReference: generatePurchaseReference(),
-      price: 9.99,
+      price: cardPlan.price,
+      cardPlanId: cardPlan.id,
       ownerId,
     });
   }

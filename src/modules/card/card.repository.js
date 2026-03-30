@@ -1,5 +1,35 @@
 const prisma = require('../../config/prisma');
 
+const offerCreatorSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  role: true,
+};
+
+const cardInclude = {
+  cardPlan: {
+    include: {
+      offerLinks: {
+        include: {
+          offer: {
+            include: {
+              creator: {
+                select: offerCreatorSelect,
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      },
+    },
+  },
+};
+
 class CardRepository {
   async findCurrentUserCard(ownerId) {
     return prisma.card.findFirst({
@@ -12,6 +42,7 @@ class CardRepository {
       orderBy: {
         createdAt: 'desc',
       },
+      include: cardInclude,
     });
   }
 
@@ -21,21 +52,16 @@ class CardRepository {
         ownerId,
         activationCode,
       },
+      include: cardInclude,
     });
   }
 
   async findAllCards() {
     return prisma.card.findMany({
       include: {
+        ...cardInclude,
         owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phoneNumber: true,
-            role: true,
-          },
+          select: offerCreatorSelect,
         },
       },
       orderBy: {
@@ -44,9 +70,35 @@ class CardRepository {
     });
   }
 
+  async findActiveCardPlanById(cardPlanId) {
+    return prisma.cardPlan.findFirst({
+      where: {
+        id: cardPlanId,
+        status: 'ACTIVE',
+      },
+      include: {
+        offerLinks: {
+          include: {
+            offer: {
+              include: {
+                creator: {
+                  select: offerCreatorSelect,
+                },
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
+  }
+
   async createCard(data) {
     return prisma.card.create({
       data,
+      include: cardInclude,
     });
   }
 
@@ -57,6 +109,7 @@ class CardRepository {
         status: 'ACTIVE',
         activatedAt: new Date(),
       },
+      include: cardInclude,
     });
   }
 }
