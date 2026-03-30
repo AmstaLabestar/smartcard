@@ -42,6 +42,7 @@ class CardService {
       price: cardPlan.price,
       cardPlanId: cardPlan.id,
       ownerId,
+      offerAccessOfferIds: (cardPlan.offerLinks || []).map((link) => link.offerId),
     });
   }
 

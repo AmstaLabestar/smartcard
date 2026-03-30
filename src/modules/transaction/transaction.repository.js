@@ -11,6 +11,18 @@ const personSelect = {
   updatedAt: true,
 };
 
+const offerAccessInclude = {
+  include: {
+    offer: {
+      include: {
+        creator: {
+          select: personSelect,
+        },
+      },
+    },
+  },
+};
+
 class TransactionRepository {
   async findCardByQrCode(qrCode) {
     return prisma.card.findUnique({
@@ -26,6 +38,12 @@ class TransactionRepository {
                 offerId: true,
               },
             },
+          },
+        },
+        offerAccesses: {
+          ...offerAccessInclude,
+          orderBy: {
+            createdAt: 'asc',
           },
         },
       },
@@ -84,6 +102,12 @@ class TransactionRepository {
                 },
               },
             },
+            offerAccesses: {
+              ...offerAccessInclude,
+              orderBy: {
+                createdAt: 'asc',
+              },
+            },
           },
         },
         offer: {
@@ -116,6 +140,12 @@ class TransactionRepository {
                     },
                   },
                 },
+              },
+            },
+            offerAccesses: {
+              ...offerAccessInclude,
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },
@@ -160,6 +190,12 @@ class TransactionRepository {
                     },
                   },
                 },
+              },
+            },
+            offerAccesses: {
+              ...offerAccessInclude,
+              orderBy: {
+                createdAt: 'asc',
               },
             },
           },

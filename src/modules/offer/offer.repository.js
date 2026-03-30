@@ -40,25 +40,22 @@ class OfferRepository {
       where: {
         ownerId: userId,
         status: 'ACTIVE',
-        cardPlanId: {
-          not: null,
-        },
       },
       select: {
-        cardPlanId: true,
+        id: true,
       },
     });
 
-    if (!activeCard?.cardPlanId) {
+    if (!activeCard?.id) {
       return [];
     }
 
     return prisma.offer.findMany({
       where: {
         status: 'ACTIVE',
-        cardPlanLinks: {
+        cardAccessLinks: {
           some: {
-            cardPlanId: activeCard.cardPlanId,
+            cardId: activeCard.id,
           },
         },
       },

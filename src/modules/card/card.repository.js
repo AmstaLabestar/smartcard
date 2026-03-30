@@ -9,23 +9,35 @@ const offerCreatorSelect = {
   role: true,
 };
 
+const offerWithCreatorInclude = {
+  creator: {
+    select: offerCreatorSelect,
+  },
+};
+
 const cardInclude = {
   cardPlan: {
     include: {
       offerLinks: {
         include: {
           offer: {
-            include: {
-              creator: {
-                select: offerCreatorSelect,
-              },
-            },
+            include: offerWithCreatorInclude,
           },
         },
         orderBy: {
           createdAt: 'asc',
         },
       },
+    },
+  },
+  offerAccesses: {
+    include: {
+      offer: {
+        include: offerWithCreatorInclude,
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
     },
   },
 };
@@ -124,11 +136,7 @@ class CardRepository {
         offerLinks: {
           include: {
             offer: {
-              include: {
-                creator: {
-                  select: offerCreatorSelect,
-                },
-              },
+              include: offerWithCreatorInclude,
             },
           },
           orderBy: {
@@ -140,8 +148,18 @@ class CardRepository {
   }
 
   async createCard(data) {
+    const { offerAccessOfferIds = [], ...cardData } = data;
+
     return prisma.card.create({
-      data,
+      data: {
+        ...cardData,
+        offerAccesses:
+          offerAccessOfferIds.length > 0
+            ? {
+                create: offerAccessOfferIds.map((offerId) => ({ offerId })),
+              }
+            : undefined,
+      },
       include: cardInclude,
     });
   }
