@@ -4,6 +4,7 @@ const authRoutes = require('../modules/auth/auth.routes');
 const meRoutes = require('../modules/me/me.routes');
 const userRoutes = require('../modules/user/user.routes');
 const cardRoutes = require('../modules/card/card.routes');
+const cardPlanRoutes = require('../modules/card-plan/card-plan.routes');
 const offerRoutes = require('../modules/offer/offer.routes');
 const transactionRoutes = require('../modules/transaction/transaction.routes');
 
@@ -13,6 +14,7 @@ router.use('/auth', authRoutes);
 router.use('/me', meRoutes);
 router.use('/users', userRoutes);
 router.use('/cards', cardRoutes);
+router.use('/card-plans', cardPlanRoutes);
 router.use('/offers', offerRoutes);
 router.use('/transactions', transactionRoutes);
 
