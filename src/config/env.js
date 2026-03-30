@@ -1,5 +1,5 @@
-const dotenv = require('dotenv');
 const { z } = require('zod');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -10,6 +10,10 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10),
   JWT_EXPIRES_IN: z.string().default('7d'),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  JSON_BODY_LIMIT: z.string().default('1mb'),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
+  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(100),
+  AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(10),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

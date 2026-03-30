@@ -6,12 +6,13 @@ function createSuccessResponse({ message = '', data = null }) {
   };
 }
 
-function createErrorResponse({ message = 'Internal server error', code = 'INTERNAL_SERVER_ERROR', details = null }) {
+function createErrorResponse({ message = 'Internal server error', code = 'INTERNAL_SERVER_ERROR', details = null, requestId = null }) {
   return {
     success: false,
     error: {
       message,
       code,
+      ...(requestId && { requestId }),
       ...(details && { details }),
     },
   };

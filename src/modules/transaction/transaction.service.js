@@ -1,5 +1,6 @@
 const { generateTransactionReference } = require('../../utils/identifiers');
 const { AppError } = require('../../utils/app-error');
+const { logInfo, logWarn } = require('../../utils/logger');
 
 const MAX_ALLOWED_AMOUNT = 100000;
 const ABNORMAL_AMOUNT_THRESHOLD = 5000;
@@ -49,31 +50,23 @@ class TransactionService {
     }
 
     if (originalAmount > MAX_ALLOWED_AMOUNT) {
-      console.warn(
-        JSON.stringify({
-          event: 'transaction_abnormal_amount',
-          merchantId: requester.sub,
-          cardId: card.id,
-          offerId: offer.id,
-          originalAmount,
-          timestamp: new Date().toISOString(),
-        }),
-      );
+      logWarn('transaction_abnormal_amount', {
+        merchantId: requester.sub,
+        cardId: card.id,
+        offerId: offer.id,
+        originalAmount,
+      });
 
       throw new AppError('Amount exceeds the allowed limit', 400, 'AMOUNT_LIMIT_EXCEEDED');
     }
 
     if (originalAmount >= ABNORMAL_AMOUNT_THRESHOLD) {
-      console.warn(
-        JSON.stringify({
-          event: 'transaction_high_amount_warning',
-          merchantId: requester.sub,
-          cardId: card.id,
-          offerId: offer.id,
-          originalAmount,
-          timestamp: new Date().toISOString(),
-        }),
-      );
+      logWarn('transaction_high_amount_warning', {
+        merchantId: requester.sub,
+        cardId: card.id,
+        offerId: offer.id,
+        originalAmount,
+      });
     }
 
     const duplicateWindowStart = new Date(Date.now() - DUPLICATE_SCAN_WINDOW_MS);
@@ -110,18 +103,16 @@ class TransactionService {
       reference: generateTransactionReference(),
     });
 
-    console.info(
-      JSON.stringify({
-        event: 'transaction_created',
-        userId: card.ownerId,
-        merchantId: offer.creatorId,
-        offerId: offer.id,
-        amount: finalAmount,
-        originalAmount,
-        discountAmount,
-        timestamp: new Date().toISOString(),
-      }),
-    );
+    logInfo('transaction_created', {
+      userId: card.ownerId,
+      merchantId: offer.creatorId,
+      offerId: offer.id,
+      amount: finalAmount,
+      originalAmount,
+      discountAmount,
+      transactionId: transaction.id,
+      reference: transaction.reference,
+    });
 
     return transaction;
   }
