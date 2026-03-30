@@ -27,7 +27,8 @@ class AuthRepository {
   }
 
   toPublicUser(user) {
-    const { passwordHash, ...safeUser } = user;
+    const safeUser = { ...user };
+    delete safeUser.passwordHash;
     return safeUser;
   }
 }

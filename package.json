@@ -10,6 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:push": "prisma db push",
+    "smoke": "node scripts/smoke-check.js",
+    "check": "npm run smoke && npm run lint",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."

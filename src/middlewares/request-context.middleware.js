@@ -1,7 +1,5 @@
-const crypto = require('crypto');
-
 function requestContextMiddleware(req, res, next) {
-  const requestId = req.headers['x-request-id'] || crypto.randomUUID();
+  const requestId = req.headers['x-request-id'] || globalThis.crypto.randomUUID();
 
   req.requestId = requestId;
   res.setHeader('x-request-id', requestId);
