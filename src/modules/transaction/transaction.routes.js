@@ -5,7 +5,7 @@ const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
 const transactionController = require('./transaction.controller');
 const { buildTransactionContainer } = require('./transaction.container');
-const { scanTransactionSchema } = require('./transaction.validation');
+const { scanPreviewSchema, scanTransactionSchema } = require('./transaction.validation');
 
 const router = express.Router();
 
@@ -15,6 +15,15 @@ router.use((req, _res, next) => {
   req.container = buildTransactionContainer();
   next();
 });
+
+router.post(
+  '/scan/preview',
+  requireRole('MERCHANT', 'ADMIN'),
+  asyncHandler(async (req, res) => {
+    req.body = validate(scanPreviewSchema, req.body);
+    return transactionController.previewScan(req, res);
+  }),
+);
 
 router.post(
   '/scan',

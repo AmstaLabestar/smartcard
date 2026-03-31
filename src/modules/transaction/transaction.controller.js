@@ -1,5 +1,23 @@
 const { createSuccessResponse } = require('../../utils/api-response');
-const { sanitizeTransaction } = require('../../utils/serializers');
+const { sanitizeCard, sanitizeOffer, sanitizeTransaction, sanitizeUser } = require('../../utils/serializers');
+
+async function previewScan(req, res) {
+  const preview = await req.container.transactionService.previewScan({
+    requester: req.user,
+    payload: req.body,
+  });
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Card scanned successfully',
+      data: {
+        card: sanitizeCard(preview.card, { includeQrCode: true }),
+        customer: sanitizeUser(preview.customer),
+        eligibleOffers: preview.eligibleOffers.map(sanitizeOffer),
+      },
+    }),
+  );
+}
 
 async function scanTransaction(req, res) {
   const transaction = await req.container.transactionService.scanAndCreateTransaction({
@@ -38,6 +56,7 @@ async function listMerchantTransactions(req, res) {
 }
 
 module.exports = {
+  previewScan,
   scanTransaction,
   listMyTransactions,
   listMerchantTransactions,
