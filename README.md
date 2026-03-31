@@ -38,21 +38,6 @@ npm run lint
 npm run check
 ```
 
-## Docker
-
-Image de production backend :
-
-```bash
-docker build -t smartcard-backend .
-docker run --env-file .env -p 4000:4000 smartcard-backend
-```
-
-Le conteneur suppose :
-
-- une base PostgreSQL/Neon accessible via `DATABASE_URL`
-- un `JWT_SECRET` defini
-- un `CORS_ORIGIN` coherent avec l URL du frontend
-
 
 ## Tests
 
@@ -71,6 +56,18 @@ npm run test:integration
 ```
 
 Les tests sont volutivement legers et se concentrent sur les regles metier et les reponses API les plus critiques.
+
+## CI
+
+Une GitHub Action `Backend CI` verifie automatiquement :
+
+- l installation des dependances
+- la generation Prisma
+- le lint
+- les tests
+- les smoke checks
+
+Le workflow est lance sur `main`, sur les branches `feature/*` et sur les pull requests.
 
 ## Structure
 
