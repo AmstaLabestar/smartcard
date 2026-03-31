@@ -73,7 +73,7 @@ Secrets attendus :
 - `VPS_SSH_PRIVATE_KEY`
 - `VPS_SSH_PASSPHRASE`
 - `VPS_SUDO_PASSWORD`
-- `BACKEND_ENV_FILE`
+- `BACKEND_ENV_FILE_BASE64`
 - `DEPLOY_PATH` optionnel, sinon `/home/tanga/apps/smartcard/backend`
 
 
