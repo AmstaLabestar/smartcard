@@ -53,6 +53,15 @@ Le conteneur suppose :
 - un `JWT_SECRET` defini
 - un `CORS_ORIGIN` coherent avec l URL du frontend
 
+## VPS
+
+Les fichiers de deploiement manuel se trouvent dans :
+
+- [`deploy/docker-compose.backend.yml`](deploy/docker-compose.backend.yml)
+- [`deploy/backend.env.example`](deploy/backend.env.example)
+- [`deploy/nginx/smartcard.conf`](deploy/nginx/smartcard.conf)
+- [`docs/vps-deployment.md`](docs/vps-deployment.md)
+
 
 ## Tests
 
