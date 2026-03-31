@@ -5,7 +5,6 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-    container_name: smartcard-backend
     restart: unless-stopped
     env_file:
       - ./backend.env
