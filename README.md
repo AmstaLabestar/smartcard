@@ -62,6 +62,20 @@ Les fichiers de deploiement manuel se trouvent dans :
 - [`deploy/nginx/smartcard.conf`](deploy/nginx/smartcard.conf)
 - [`docs/vps-deployment.md`](docs/vps-deployment.md)
 
+## Deploy
+
+Une GitHub Action `Backend Deploy` peut deployer automatiquement sur le VPS a chaque push sur `main` ou manuellement.
+
+Secrets attendus :
+
+- `VPS_HOST`
+- `VPS_USERNAME`
+- `VPS_SSH_PRIVATE_KEY`
+- `VPS_SSH_PASSPHRASE`
+- `VPS_SUDO_PASSWORD`
+- `BACKEND_ENV_FILE`
+- `DEPLOY_PATH` optionnel, sinon `/home/tanga/apps/smartcard/backend`
+
 
 ## Tests
 
