@@ -38,6 +38,25 @@ npm run lint
 npm run check
 ```
 
+
+## Tests
+
+La fondation de test couvre deja :
+
+- les services critiques `card` et `transaction`
+- la validation centralisee
+- un contrat HTTP de base sur `/health` et le format d erreur
+
+Scripts disponibles :
+
+```bash
+npm run test
+npm run test:unit
+npm run test:integration
+```
+
+Les tests sont volutivement legers et se concentrent sur les regles metier et les reponses API les plus critiques.
+
 ## Structure
 
 - `src/modules`: architecture feature-based

@@ -11,10 +11,13 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "smoke": "node scripts/smoke-check.js",
-    "check": "npm run smoke && npm run lint",
+    "check": "npm run smoke && npm run lint && npm run test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "node ./tests/run.js",
+    "test:unit": "node ./tests/run.js unit",
+    "test:integration": "node ./tests/run.js integration"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
@@ -34,6 +37,7 @@
     "globals": "^16.0.0",
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
-    "prisma": "^6.5.0"
+    "prisma": "^6.5.0",
+    "supertest": "^7.2.2"
   }
 }
