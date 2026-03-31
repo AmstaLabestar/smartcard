@@ -36,9 +36,7 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
-            cat > deploy/backend.env <<'EOF'
-            ${{ secrets.BACKEND_ENV_FILE }}
-            EOF
+            printf '%s' '${{ secrets.BACKEND_ENV_FILE_BASE64 }}' | base64 -d > deploy/backend.env
 
             echo "${{ secrets.VPS_SUDO_PASSWORD }}" | sudo -S docker compose -f deploy/docker-compose.backend.yml up -d --build --remove-orphans
 
