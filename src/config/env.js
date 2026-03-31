@@ -14,6 +14,7 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(100),
   AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(10),
+  MAX_TRANSACTION_AMOUNT: z.coerce.number().positive().default(1000000),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

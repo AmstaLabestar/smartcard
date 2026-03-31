@@ -1,5 +1,9 @@
 const { z } = require('zod');
 
+const { env } = require('../../config/env');
+
+const MAX_ALLOWED_AMOUNT = env.MAX_TRANSACTION_AMOUNT;
+
 const scanPreviewSchema = z.object({
   qrCode: z
     .string({ required_error: 'Le QR code est requis.' })
@@ -18,7 +22,7 @@ const scanTransactionSchema = z.object({
   originalAmount: z.coerce
     .number({ invalid_type_error: 'Le montant doit etre un nombre valide.' })
     .positive('Le montant doit etre superieur a zero.')
-    .max(100000, 'Le montant depasse la limite autorisee.'),
+    .max(MAX_ALLOWED_AMOUNT, `Le montant depasse la limite autorisee de ${MAX_ALLOWED_AMOUNT}.`),
 });
 
 module.exports = {

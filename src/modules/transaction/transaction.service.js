@@ -1,9 +1,10 @@
 const { generateTransactionReference } = require('../../utils/identifiers');
 const { AppError } = require('../../utils/app-error');
 const { logInfo, logWarn } = require('../../utils/logger');
+const { env } = require('../../config/env');
 
-const MAX_ALLOWED_AMOUNT = 100000;
-const ABNORMAL_AMOUNT_THRESHOLD = 5000;
+const MAX_ALLOWED_AMOUNT = env.MAX_TRANSACTION_AMOUNT;
+const ABNORMAL_AMOUNT_THRESHOLD = Math.min(5000, MAX_ALLOWED_AMOUNT);
 const DUPLICATE_SCAN_WINDOW_MS = 60000;
 
 class TransactionService {
@@ -49,6 +50,9 @@ class TransactionService {
       card,
       customer: card.owner,
       eligibleOffers,
+      limits: {
+        maxTransactionAmount: MAX_ALLOWED_AMOUNT,
+      },
     };
   }
 
@@ -91,9 +95,10 @@ class TransactionService {
         cardId: card.id,
         offerId: offer.id,
         originalAmount,
+        maxAllowedAmount: MAX_ALLOWED_AMOUNT,
       });
 
-      throw new AppError('Le montant depasse la limite autorisee pour une transaction.', 400, 'AMOUNT_LIMIT_EXCEEDED');
+      throw new AppError(`Le montant depasse la limite autorisee de ${MAX_ALLOWED_AMOUNT}.`, 400, 'AMOUNT_LIMIT_EXCEEDED');
     }
 
     if (originalAmount >= ABNORMAL_AMOUNT_THRESHOLD) {
