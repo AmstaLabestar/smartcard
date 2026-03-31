@@ -38,6 +38,21 @@ npm run lint
 npm run check
 ```
 
+## Docker
+
+Image de production backend :
+
+```bash
+docker build -t smartcard-backend .
+docker run --env-file .env -p 4000:4000 smartcard-backend
+```
+
+Le conteneur suppose :
+
+- une base PostgreSQL/Neon accessible via `DATABASE_URL`
+- un `JWT_SECRET` defini
+- un `CORS_ORIGIN` coherent avec l URL du frontend
+
 
 ## Tests
 
