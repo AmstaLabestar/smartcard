@@ -33,7 +33,8 @@ jobs:
             cd "$APP_DIR"
             git fetch origin
             git checkout main
-            git pull origin main
+            git reset --hard origin/main
+            git clean -fd
 
             cat > deploy/backend.env <<'EOF'
             ${{ secrets.BACKEND_ENV_FILE }}
