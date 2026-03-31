@@ -47,6 +47,7 @@ function errorMiddleware(error, req, res, _next) {
       statusCode,
       code,
       message: normalizedError.message,
+      ...(details && { details }),
     });
   }
 
