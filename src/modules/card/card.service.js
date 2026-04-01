@@ -27,7 +27,7 @@ class CardService {
       throw new AppError('Card plan not found or inactive', 404, 'CARD_PLAN_NOT_FOUND');
     }
 
-    return this.cardRepository.createCard({
+    const card = await this.cardRepository.createCard({
       title: cardPlan.name,
       description: cardPlan.description || 'Reduction card purchased from the platform',
       planNameSnapshot: cardPlan.name,
@@ -44,6 +44,9 @@ class CardService {
       ownerId,
       offerAccessOfferIds: (cardPlan.offerLinks || []).map((link) => link.offerId),
     });
+
+    // A purchased card becomes the user's current card immediately.
+    return this.cardRepository.activateCardForOwner({ ownerId, cardId: card.id });
   }
 
   async activateCardByActivationCode({ ownerId, activationCode }) {
@@ -101,3 +104,5 @@ class CardService {
 }
 
 module.exports = { CardService };
+
+
