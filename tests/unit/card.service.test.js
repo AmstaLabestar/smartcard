@@ -11,6 +11,7 @@ module.exports = {
       name: 'purchaseCard creates a card from the chosen plan snapshot',
       run: async () => {
         const createCardCalls = [];
+        const activateCardForOwnerCalls = [];
         const service = new CardService({
           cardRepository: {
             findOwnedCardByPlan: async () => null,
@@ -26,6 +27,10 @@ module.exports = {
               createCardCalls.push(payload);
               return { id: 'card_1', ...payload };
             },
+            activateCardForOwner: async (payload) => {
+              activateCardForOwnerCalls.push(payload);
+              return { id: payload.cardId, ownerId: payload.ownerId, status: 'ACTIVE' };
+            },
           },
         });
 
@@ -35,10 +40,13 @@ module.exports = {
         });
 
         assert.equal(card.ownerId, 'user_1');
-        assert.equal(card.cardPlanId, 'plan_1');
-        assert.equal(card.planNameSnapshot, 'Carte Premium');
+        assert.equal(card.id, 'card_1');
+        assert.equal(card.status, 'ACTIVE');
+        assert.equal(createCardCalls[0].cardPlanId, 'plan_1');
+        assert.equal(createCardCalls[0].planNameSnapshot, 'Carte Premium');
         assert.deepEqual(createCardCalls[0].offerAccessOfferIds, ['offer_1', 'offer_2']);
         assert.equal(createCardCalls[0].status, 'INACTIVE');
+        assert.deepEqual(activateCardForOwnerCalls[0], { ownerId: 'user_1', cardId: 'card_1' });
       },
     },
     {
