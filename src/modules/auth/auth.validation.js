@@ -9,7 +9,7 @@ const phoneNumberSchema = z
 
 const authRegisterSchema = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().trim().email().optional(),
     phoneNumber: phoneNumberSchema.optional(),
     password: z.string().min(8).max(72),
     firstName: z.string().min(1).max(100).optional(),
@@ -22,7 +22,7 @@ const authRegisterSchema = z
 
 const authLoginSchema = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().trim().email().optional(),
     phoneNumber: phoneNumberSchema.optional(),
     password: z.string().min(8).max(72),
   })

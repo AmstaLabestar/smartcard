@@ -2,15 +2,25 @@ const bcrypt = require('bcrypt');
 
 const { generateAccessToken } = require('../../utils/tokens');
 
+function normalizeContactPayload(payload) {
+  return {
+    ...payload,
+    email: typeof payload.email === 'string' ? payload.email.trim() : payload.email,
+    phoneNumber: typeof payload.phoneNumber === 'string' ? payload.phoneNumber.trim() : payload.phoneNumber,
+  };
+}
+
 class AuthService {
   constructor({ authRepository }) {
     this.authRepository = authRepository;
   }
 
   async register(payload) {
+    const normalizedPayload = normalizeContactPayload(payload);
+
     const existingUser = await this.authRepository.findByEmailOrPhoneNumber({
-      email: payload.email,
-      phoneNumber: payload.phoneNumber,
+      email: normalizedPayload.email,
+      phoneNumber: normalizedPayload.phoneNumber,
     });
 
     if (existingUser) {
@@ -22,11 +32,11 @@ class AuthService {
     const passwordHash = await bcrypt.hash(payload.password, 10);
 
     const user = await this.authRepository.createUser({
-      email: payload.email,
-      phoneNumber: payload.phoneNumber,
+      email: normalizedPayload.email,
+      phoneNumber: normalizedPayload.phoneNumber,
       passwordHash,
-      firstName: payload.firstName,
-      lastName: payload.lastName,
+      firstName: normalizedPayload.firstName,
+      lastName: normalizedPayload.lastName,
       role: 'USER',
     });
 
@@ -42,9 +52,11 @@ class AuthService {
   }
 
   async login(payload) {
+    const normalizedPayload = normalizeContactPayload(payload);
+
     const user = await this.authRepository.findByEmailOrPhoneNumber({
-      email: payload.email,
-      phoneNumber: payload.phoneNumber,
+      email: normalizedPayload.email,
+      phoneNumber: normalizedPayload.phoneNumber,
     });
 
     if (!user) {
