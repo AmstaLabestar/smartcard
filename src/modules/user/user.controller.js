@@ -22,7 +22,19 @@ async function listMerchants(req, res) {
   );
 }
 
+async function createMerchant(req, res) {
+  const merchant = await req.container.userService.createMerchant(req.body);
+
+  res.status(201).json(
+    createSuccessResponse({
+      message: 'Merchant created successfully',
+      data: merchant,
+    }),
+  );
+}
+
 module.exports = {
   listUsers,
   listMerchants,
+  createMerchant,
 };

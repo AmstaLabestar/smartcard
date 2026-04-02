@@ -27,7 +27,7 @@ class AuthService {
       passwordHash,
       firstName: payload.firstName,
       lastName: payload.lastName,
-      role: payload.role || 'USER',
+      role: 'USER',
     });
 
     return {
