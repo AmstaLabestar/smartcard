@@ -16,7 +16,37 @@ const offerWithCreatorInclude = {
   },
 };
 
-const cardInclude = {
+const cardListSelect = {
+  id: true,
+  title: true,
+  description: true,
+  status: true,
+  cardNumber: true,
+  price: true,
+  activatedAt: true,
+  createdAt: true,
+  updatedAt: true,
+  cardPlanId: true,
+  planNameSnapshot: true,
+  planDescriptionSnapshot: true,
+  planHighlightsSnapshot: true,
+  planPriceSnapshot: true,
+  cardPlan: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      marketingHighlights: true,
+      price: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  },
+};
+
+const cardDetailInclude = {
   cardPlan: {
     include: {
       offerLinks: {
@@ -53,7 +83,7 @@ class CardRepository {
       orderBy: {
         updatedAt: 'desc',
       },
-      include: cardInclude,
+      include: cardDetailInclude,
     });
   }
 
@@ -70,7 +100,7 @@ class CardRepository {
         },
       },
       orderBy: [{ status: 'asc' }, { createdAt: 'desc' }],
-      include: cardInclude,
+      select: cardListSelect,
     });
   }
 
@@ -86,7 +116,7 @@ class CardRepository {
       orderBy: {
         createdAt: 'desc',
       },
-      include: cardInclude,
+      include: cardDetailInclude,
     });
   }
 
@@ -96,7 +126,7 @@ class CardRepository {
         id: cardId,
         ownerId,
       },
-      include: cardInclude,
+      include: cardDetailInclude,
     });
   }
 
@@ -109,14 +139,14 @@ class CardRepository {
           not: 'ARCHIVED',
         },
       },
-      include: cardInclude,
+      include: cardDetailInclude,
     });
   }
 
   async findAllCards({ pagination }) {
     const { page, limit, skip } = getPaginationParams(pagination);
-    const include = {
-      ...cardInclude,
+    const select = {
+      ...cardListSelect,
       owner: {
         select: offerCreatorSelect,
       },
@@ -126,7 +156,7 @@ class CardRepository {
       prisma.card.findMany({
         skip,
         take: limit,
-        include,
+        select,
         orderBy: {
           createdAt: 'desc',
         },
@@ -171,7 +201,7 @@ class CardRepository {
               }
             : undefined,
       },
-      include: cardInclude,
+      include: cardDetailInclude,
     });
   }
 
@@ -199,7 +229,7 @@ class CardRepository {
           status: 'ACTIVE',
           activatedAt,
         },
-        include: cardInclude,
+        include: cardDetailInclude,
       }),
     ]);
 
