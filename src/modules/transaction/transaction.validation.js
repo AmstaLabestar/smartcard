@@ -1,6 +1,7 @@
 const { z } = require('zod');
 
 const { env } = require('../../config/env');
+const { paginationQuerySchema } = require('../../utils/pagination');
 
 const MAX_ALLOWED_AMOUNT = env.MAX_TRANSACTION_AMOUNT;
 
@@ -26,6 +27,7 @@ const scanTransactionSchema = z.object({
 });
 
 module.exports = {
+  transactionListQuerySchema: paginationQuerySchema,
   scanPreviewSchema,
   scanTransactionSchema,
 };

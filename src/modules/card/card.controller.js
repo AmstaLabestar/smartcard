@@ -69,12 +69,13 @@ async function listMyCards(req, res) {
 }
 
 async function listAllCards(req, res) {
-  const cards = await req.container.cardService.listAllCards();
+  const cards = await req.container.cardService.listAllCards(req.query);
 
   res.status(200).json(
     createSuccessResponse({
       message: 'Cards fetched successfully',
-      data: cards.map((card) => sanitizeCard(card)),
+      data: cards.items.map((card) => sanitizeCard(card)),
+      meta: cards.meta,
     }),
   );
 }

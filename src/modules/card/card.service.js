@@ -5,6 +5,7 @@ const {
   generateQrCodeValue,
 } = require('../../utils/identifiers');
 const { AppError } = require('../../utils/app-error');
+const { createPaginationMeta } = require('../../utils/pagination');
 
 class CardService {
   constructor({ cardRepository }) {
@@ -98,8 +99,12 @@ class CardService {
     return this.cardRepository.findCardsByOwnerId(ownerId);
   }
 
-  async listAllCards() {
-    return this.cardRepository.findAllCards();
+  async listAllCards(pagination) {
+    const result = await this.cardRepository.findAllCards({ pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 }
 

@@ -2,6 +2,7 @@ const { generateTransactionReference } = require('../../utils/identifiers');
 const { AppError } = require('../../utils/app-error');
 const { logInfo, logWarn } = require('../../utils/logger');
 const { env } = require('../../config/env');
+const { createPaginationMeta } = require('../../utils/pagination');
 
 const MAX_ALLOWED_AMOUNT = env.MAX_TRANSACTION_AMOUNT;
 const ABNORMAL_AMOUNT_THRESHOLD = Math.min(5000, MAX_ALLOWED_AMOUNT);
@@ -160,16 +161,27 @@ class TransactionService {
     return transaction;
   }
 
-  async listMyTransactions(userId) {
-    return this.transactionRepository.findTransactionsByUserId(userId);
+  async listMyTransactions({ userId, pagination }) {
+    const result = await this.transactionRepository.findTransactionsByUserId({ userId, pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
-  async listMerchantTransactions(requester) {
+  async listMerchantTransactions({ requester, pagination }) {
     if (requester.role === 'ADMIN') {
       throw new AppError('La liste des transactions marchand n est pas disponible pour ce role.', 400, 'ADMIN_LISTING_NOT_IMPLEMENTED');
     }
 
-    return this.transactionRepository.findTransactionsByMerchantId(requester.sub);
+    const result = await this.transactionRepository.findTransactionsByMerchantId({
+      merchantId: requester.sub,
+      pagination,
+    });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 }
 

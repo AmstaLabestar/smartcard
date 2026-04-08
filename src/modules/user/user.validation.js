@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { paginationQuerySchema } = require('../../utils/pagination');
 
 const phoneNumberSchema = z
   .string()
@@ -22,4 +23,5 @@ const createMerchantSchema = z
 
 module.exports = {
   createMerchantSchema,
+  userListQuerySchema: paginationQuerySchema,
 };

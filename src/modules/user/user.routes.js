@@ -5,7 +5,7 @@ const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
 const userController = require('./user.controller');
 const { buildUserContainer } = require('./user.container');
-const { createMerchantSchema } = require('./user.validation');
+const { createMerchantSchema, userListQuerySchema } = require('./user.validation');
 
 const router = express.Router();
 
@@ -17,8 +17,14 @@ router.use((req, _res, next) => {
   next();
 });
 
-router.get('/admin/all', asyncHandler(async (req, res) => userController.listUsers(req, res)));
-router.get('/admin/merchants', asyncHandler(async (req, res) => userController.listMerchants(req, res)));
+router.get('/admin/all', asyncHandler(async (req, res) => {
+  req.query = validate(userListQuerySchema, req.query);
+  return userController.listUsers(req, res);
+}));
+router.get('/admin/merchants', asyncHandler(async (req, res) => {
+  req.query = validate(userListQuerySchema, req.query);
+  return userController.listMerchants(req, res);
+}));
 router.post(
   '/admin/merchants',
   asyncHandler(async (req, res) => {

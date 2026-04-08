@@ -20,6 +20,9 @@ model User {
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+
+  @@index([role])
+  @@index([createdAt])
 }
 
 model Card {
@@ -45,6 +48,11 @@ model Card {
   transactions             Transaction[]
   createdAt                DateTime         @default(now())
   updatedAt                DateTime         @updatedAt
+
+  @@index([ownerId])
+  @@index([cardPlanId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model CardPlan {
@@ -70,6 +78,7 @@ model CardPlanOffer {
   createdAt  DateTime @default(now())
 
   @@unique([cardPlanId, offerId])
+  @@index([offerId])
 }
 
 model CardOfferAccess {
@@ -81,6 +90,8 @@ model CardOfferAccess {
   createdAt DateTime @default(now())
 
   @@unique([cardId, offerId])
+  @@index([cardId])
+  @@index([offerId])
 }
 
 model Offer {
@@ -98,6 +109,10 @@ model Offer {
   transactions    Transaction[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+
+  @@index([creatorId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Transaction {
@@ -115,6 +130,14 @@ model Transaction {
   offer          Offer?            @relation(fields: [offerId], references: [id], onDelete: SetNull)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([cardId])
+  @@index([offerId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([cardId, offerId, createdAt])
+  @@index([offerId, createdAt])
 }
 
 enum UserRole {

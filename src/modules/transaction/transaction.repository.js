@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const { getPaginationParams } = require('../../utils/pagination');
 
 const personSelect = {
   id: true,
@@ -121,97 +122,119 @@ class TransactionRepository {
     });
   }
 
-  async findTransactionsByUserId(userId) {
-    return prisma.transaction.findMany({
-      where: { userId },
-      include: {
-        card: {
-          include: {
-            cardPlan: {
-              include: {
-                offerLinks: {
-                  include: {
-                    offer: {
-                      include: {
-                        creator: {
-                          select: personSelect,
-                        },
+  async findTransactionsByUserId({ userId, pagination }) {
+    const where = { userId };
+    const { page, limit, skip } = getPaginationParams(pagination);
+    const include = {
+      card: {
+        include: {
+          cardPlan: {
+            include: {
+              offerLinks: {
+                include: {
+                  offer: {
+                    include: {
+                      creator: {
+                        select: personSelect,
                       },
                     },
                   },
                 },
               },
             },
-            offerAccesses: {
-              ...offerAccessInclude,
-              orderBy: {
-                createdAt: 'asc',
-              },
-            },
           },
-        },
-        offer: {
-          include: {
-            creator: {
-              select: personSelect,
+          offerAccesses: {
+            ...offerAccessInclude,
+            orderBy: {
+              createdAt: 'asc',
             },
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
+      offer: {
+        include: {
+          creator: {
+            select: personSelect,
+          },
+        },
       },
-    });
+    };
+
+    const [items, total] = await prisma.$transaction([
+      prisma.transaction.findMany({
+        where,
+        skip,
+        take: limit,
+        include,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.transaction.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
   }
 
-  async findTransactionsByMerchantId(merchantId) {
-    return prisma.transaction.findMany({
-      where: {
-        offer: {
-          creatorId: merchantId,
-        },
+  async findTransactionsByMerchantId({ merchantId, pagination }) {
+    const where = {
+      offer: {
+        creatorId: merchantId,
       },
-      include: {
-        user: {
-          select: personSelect,
-        },
-        card: {
-          include: {
-            cardPlan: {
-              include: {
-                offerLinks: {
-                  include: {
-                    offer: {
-                      include: {
-                        creator: {
-                          select: personSelect,
-                        },
+    };
+    const { page, limit, skip } = getPaginationParams(pagination);
+    const include = {
+      user: {
+        select: personSelect,
+      },
+      card: {
+        include: {
+          cardPlan: {
+            include: {
+              offerLinks: {
+                include: {
+                  offer: {
+                    include: {
+                      creator: {
+                        select: personSelect,
                       },
                     },
                   },
                 },
               },
             },
-            offerAccesses: {
-              ...offerAccessInclude,
-              orderBy: {
-                createdAt: 'asc',
-              },
-            },
           },
-        },
-        offer: {
-          include: {
-            creator: {
-              select: personSelect,
+          offerAccesses: {
+            ...offerAccessInclude,
+            orderBy: {
+              createdAt: 'asc',
             },
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
+      offer: {
+        include: {
+          creator: {
+            select: personSelect,
+          },
+        },
       },
-    });
+    };
+
+    const [items, total] = await prisma.$transaction([
+      prisma.transaction.findMany({
+        where,
+        skip,
+        take: limit,
+        include,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.transaction.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
   }
 }
 

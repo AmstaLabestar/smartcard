@@ -1,18 +1,27 @@
 const bcrypt = require('bcrypt');
 
 const { AppError } = require('../../utils/app-error');
+const { createPaginationMeta } = require('../../utils/pagination');
 
 class UserService {
   constructor({ userRepository }) {
     this.userRepository = userRepository;
   }
 
-  async listUsers() {
-    return this.userRepository.findUsersByRole();
+  async listUsers(pagination) {
+    const result = await this.userRepository.findUsersByRole({ pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
-  async listMerchants() {
-    return this.userRepository.findUsersByRole('MERCHANT');
+  async listMerchants(pagination) {
+    const result = await this.userRepository.findUsersByRole({ role: 'MERCHANT', pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
   async createMerchant(payload) {

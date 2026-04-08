@@ -15,34 +15,43 @@ async function createOffer(req, res) {
 }
 
 async function listOffers(req, res) {
-  const offers = await req.container.offerService.listVisibleOffers(req.user);
+  const offers = await req.container.offerService.listVisibleOffers({
+    requester: req.user,
+    pagination: req.query,
+  });
 
   res.status(200).json(
     createSuccessResponse({
       message: 'Offers fetched successfully',
-      data: offers,
+      data: offers.items,
+      meta: offers.meta,
     }),
   );
 }
 
 async function listAllOffers(req, res) {
-  const offers = await req.container.offerService.listAllOffers();
+  const offers = await req.container.offerService.listAllOffers(req.query);
 
   res.status(200).json(
     createSuccessResponse({
       message: 'All offers fetched successfully',
-      data: offers,
+      data: offers.items,
+      meta: offers.meta,
     }),
   );
 }
 
 async function listMyOffers(req, res) {
-  const offers = await req.container.offerService.listMyOffers(req.user.sub);
+  const offers = await req.container.offerService.listMyOffers({
+    creatorId: req.user.sub,
+    pagination: req.query,
+  });
 
   res.status(200).json(
     createSuccessResponse({
       message: 'Merchant offers fetched successfully',
-      data: offers,
+      data: offers.items,
+      meta: offers.meta,
     }),
   );
 }

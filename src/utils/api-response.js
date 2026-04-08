@@ -1,8 +1,9 @@
-function createSuccessResponse({ message = '', data = null }) {
+function createSuccessResponse({ message = '', data = null, meta = null }) {
   return {
     success: true,
     data,
     message,
+    ...(meta && { meta }),
   };
 }
 

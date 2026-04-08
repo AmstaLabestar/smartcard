@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const { getPaginationParams } = require('../../utils/pagination');
 
 const offerCreatorSelect = {
   id: true,
@@ -112,18 +113,28 @@ class CardRepository {
     });
   }
 
-  async findAllCards() {
-    return prisma.card.findMany({
-      include: {
-        ...cardInclude,
-        owner: {
-          select: offerCreatorSelect,
+  async findAllCards({ pagination }) {
+    const { page, limit, skip } = getPaginationParams(pagination);
+    const include = {
+      ...cardInclude,
+      owner: {
+        select: offerCreatorSelect,
+      },
+    };
+
+    const [items, total] = await prisma.$transaction([
+      prisma.card.findMany({
+        skip,
+        take: limit,
+        include,
+        orderBy: {
+          createdAt: 'desc',
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+      }),
+      prisma.card.count(),
+    ]);
+
+    return { items, total, page, limit };
   }
 
   async findActiveCardPlanById(cardPlanId) {
