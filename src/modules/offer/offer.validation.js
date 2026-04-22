@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { paginationQuerySchema } = require('../../utils/pagination');
 
 const createOfferSchema = z.object({
   title: z.string().min(3).max(120),
@@ -15,5 +16,6 @@ const updateOfferStatusSchema = z.object({
 
 module.exports = {
   createOfferSchema,
+  offerListQuerySchema: paginationQuerySchema,
   updateOfferStatusSchema,
 };

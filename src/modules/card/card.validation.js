@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { paginationQuerySchema } = require('../../utils/pagination');
 
 const purchaseCardSchema = z.object({
   cardPlanId: z.string().uuid(),
@@ -16,4 +17,5 @@ module.exports = {
   purchaseCardSchema,
   activateCardSchema,
   activateCardByIdParamsSchema,
+  cardListQuerySchema: paginationQuerySchema,
 };

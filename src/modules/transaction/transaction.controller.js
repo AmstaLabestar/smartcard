@@ -34,23 +34,31 @@ async function scanTransaction(req, res) {
 }
 
 async function listMyTransactions(req, res) {
-  const transactions = await req.container.transactionService.listMyTransactions(req.user.sub);
+  const transactions = await req.container.transactionService.listMyTransactions({
+    userId: req.user.sub,
+    pagination: req.query,
+  });
 
   res.status(200).json(
     createSuccessResponse({
       message: 'User transactions fetched successfully',
-      data: transactions.map(sanitizeTransaction),
+      data: transactions.items.map(sanitizeTransaction),
+      meta: transactions.meta,
     }),
   );
 }
 
 async function listMerchantTransactions(req, res) {
-  const transactions = await req.container.transactionService.listMerchantTransactions(req.user);
+  const transactions = await req.container.transactionService.listMerchantTransactions({
+    requester: req.user,
+    pagination: req.query,
+  });
 
   res.status(200).json(
     createSuccessResponse({
       message: 'Merchant transactions fetched successfully',
-      data: transactions.map(sanitizeTransaction),
+      data: transactions.items.map(sanitizeTransaction),
+      meta: transactions.meta,
     }),
   );
 }

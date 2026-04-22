@@ -1,18 +1,27 @@
 const bcrypt = require('bcrypt');
 
 const { AppError } = require('../../utils/app-error');
+const { createPaginationMeta } = require('../../utils/pagination');
 
 class UserService {
   constructor({ userRepository }) {
     this.userRepository = userRepository;
   }
 
-  async listUsers() {
-    return this.userRepository.findUsersByRole();
+  async listUsers(pagination) {
+    const result = await this.userRepository.findUsersByRole({ pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
-  async listMerchants() {
-    return this.userRepository.findUsersByRole('MERCHANT');
+  async listMerchants(pagination) {
+    const result = await this.userRepository.findUsersByRole({ role: 'MERCHANT', pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
   async createMerchant(payload) {
@@ -35,6 +44,31 @@ class UserService {
       lastName: payload.lastName,
       role: 'MERCHANT',
     });
+  }
+
+  async updateUserStatus({ requesterId, targetUserId, status }) {
+    const user = await this.userRepository.findById(targetUserId);
+
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    if (requesterId === targetUserId && status === 'DISABLED') {
+      throw new AppError('You cannot disable your own account', 400, 'SELF_DISABLE_FORBIDDEN');
+    }
+
+    if (user.role === 'ADMIN' && user.status === 'ACTIVE' && status === 'DISABLED') {
+      const activeAdminCount = await this.userRepository.countUsersByRoleAndStatus({
+        role: 'ADMIN',
+        status: 'ACTIVE',
+      });
+
+      if (activeAdminCount <= 1) {
+        throw new AppError('You cannot disable the last active admin', 400, 'LAST_ADMIN_DISABLE_FORBIDDEN');
+      }
+    }
+
+    return this.userRepository.updateUserStatusById(targetUserId, status);
   }
 }
 

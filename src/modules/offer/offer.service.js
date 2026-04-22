@@ -1,4 +1,5 @@
 const { AppError } = require('../../utils/app-error');
+const { createPaginationMeta } = require('../../utils/pagination');
 
 class OfferService {
   constructor({ offerRepository }) {
@@ -17,20 +18,35 @@ class OfferService {
     });
   }
 
-  async listVisibleOffers(requester) {
+  async listVisibleOffers({ requester, pagination }) {
+    let result;
+
     if (requester.role === 'USER') {
-      return this.offerRepository.findActiveOffersByUserId(requester.sub);
+      result = await this.offerRepository.findActiveOffersByUserId({ userId: requester.sub, pagination });
+    } else {
+      result = await this.offerRepository.findActiveOffers({ pagination });
     }
 
-    return this.offerRepository.findActiveOffers();
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
-  async listAllOffers() {
-    return this.offerRepository.findAllOffers();
+  async listAllOffers(pagination) {
+    const result = await this.offerRepository.findAllOffers({ pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
-  async listMyOffers(creatorId) {
-    return this.offerRepository.findOffersByCreatorId(creatorId);
+  async listMyOffers({ creatorId, pagination }) {
+    const result = await this.offerRepository.findOffersByCreatorId({ creatorId, pagination });
+    return {
+      items: result.items,
+      meta: createPaginationMeta(result),
+    };
   }
 
   async updateOfferStatus({ offerId, requester, status }) {

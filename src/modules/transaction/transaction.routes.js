@@ -5,7 +5,7 @@ const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
 const transactionController = require('./transaction.controller');
 const { buildTransactionContainer } = require('./transaction.container');
-const { scanPreviewSchema, scanTransactionSchema } = require('./transaction.validation');
+const { scanPreviewSchema, scanTransactionSchema, transactionListQuerySchema } = require('./transaction.validation');
 
 const router = express.Router();
 
@@ -34,12 +34,18 @@ router.post(
   }),
 );
 
-router.get('/mine', asyncHandler(async (req, res) => transactionController.listMyTransactions(req, res)));
+router.get('/mine', asyncHandler(async (req, res) => {
+  req.query = validate(transactionListQuerySchema, req.query);
+  return transactionController.listMyTransactions(req, res);
+}));
 
 router.get(
   '/merchant',
   requireRole('MERCHANT', 'ADMIN'),
-  asyncHandler(async (req, res) => transactionController.listMerchantTransactions(req, res)),
+  asyncHandler(async (req, res) => {
+    req.query = validate(transactionListQuerySchema, req.query);
+    return transactionController.listMerchantTransactions(req, res);
+  }),
 );
 
 module.exports = router;

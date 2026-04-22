@@ -9,6 +9,7 @@ const {
   purchaseCardSchema,
   activateCardSchema,
   activateCardByIdParamsSchema,
+  cardListQuerySchema,
 } = require('./card.validation');
 
 const router = express.Router();
@@ -46,6 +47,9 @@ router.post(
 
 router.get('/me', asyncHandler(async (req, res) => cardController.getMyCard(req, res)));
 router.get('/mine', asyncHandler(async (req, res) => cardController.listMyCards(req, res)));
-router.get('/admin/all', requireRole('ADMIN'), asyncHandler(async (req, res) => cardController.listAllCards(req, res)));
+router.get('/admin/all', requireRole('ADMIN'), asyncHandler(async (req, res) => {
+  req.query = validate(cardListQuerySchema, req.query);
+  return cardController.listAllCards(req, res);
+}));
 
 module.exports = router;

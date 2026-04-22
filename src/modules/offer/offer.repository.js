@@ -1,4 +1,5 @@
 const prisma = require('../../config/prisma');
+const { getPaginationParams } = require('../../utils/pagination');
 
 const creatorSelect = {
   id: true,
@@ -23,19 +24,29 @@ class OfferRepository {
     });
   }
 
-  async findActiveOffers() {
-    return prisma.offer.findMany({
-      where: {
-        status: 'ACTIVE',
-      },
-      include: offerInclude,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  async findActiveOffers({ pagination }) {
+    const where = {
+      status: 'ACTIVE',
+    };
+    const { page, limit, skip } = getPaginationParams(pagination);
+
+    const [items, total] = await prisma.$transaction([
+      prisma.offer.findMany({
+        where,
+        skip,
+        take: limit,
+        include: offerInclude,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.offer.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
   }
 
-  async findActiveOffersByUserId(userId) {
+  async findActiveOffersByUserId({ userId, pagination }) {
     const activeCard = await prisma.card.findFirst({
       where: {
         ownerId: userId,
@@ -47,42 +58,72 @@ class OfferRepository {
     });
 
     if (!activeCard?.id) {
-      return [];
+      const { page, limit } = getPaginationParams(pagination);
+      return { items: [], total: 0, page, limit };
     }
 
-    return prisma.offer.findMany({
-      where: {
-        status: 'ACTIVE',
-        cardAccessLinks: {
-          some: {
-            cardId: activeCard.id,
-          },
+    const where = {
+      status: 'ACTIVE',
+      cardAccessLinks: {
+        some: {
+          cardId: activeCard.id,
         },
       },
-      include: offerInclude,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    };
+    const { page, limit, skip } = getPaginationParams(pagination);
+
+    const [items, total] = await prisma.$transaction([
+      prisma.offer.findMany({
+        where,
+        skip,
+        take: limit,
+        include: offerInclude,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.offer.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
   }
 
-  async findAllOffers() {
-    return prisma.offer.findMany({
-      include: offerInclude,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  async findAllOffers({ pagination }) {
+    const { page, limit, skip } = getPaginationParams(pagination);
+
+    const [items, total] = await prisma.$transaction([
+      prisma.offer.findMany({
+        skip,
+        take: limit,
+        include: offerInclude,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.offer.count(),
+    ]);
+
+    return { items, total, page, limit };
   }
 
-  async findOffersByCreatorId(creatorId) {
-    return prisma.offer.findMany({
-      where: { creatorId },
-      include: offerInclude,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  async findOffersByCreatorId({ creatorId, pagination }) {
+    const where = { creatorId };
+    const { page, limit, skip } = getPaginationParams(pagination);
+
+    const [items, total] = await prisma.$transaction([
+      prisma.offer.findMany({
+        where,
+        skip,
+        take: limit,
+        include: offerInclude,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.offer.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
   }
 
   async findById(id) {

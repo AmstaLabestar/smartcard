@@ -9,7 +9,25 @@ const offerCreatorSelect = {
   role: true,
 };
 
-const cardPlanInclude = {
+const cardPlanListSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  description: true,
+  marketingHighlights: true,
+  price: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+  _count: {
+    select: {
+      cards: true,
+      offerLinks: true,
+    },
+  },
+};
+
+const cardPlanDetailInclude = {
   offerLinks: {
     include: {
       offer: {
@@ -36,14 +54,14 @@ class CardPlanRepository {
   async findActiveCardPlans() {
     return prisma.cardPlan.findMany({
       where: { status: 'ACTIVE' },
-      include: cardPlanInclude,
+      select: cardPlanListSelect,
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findAllCardPlans() {
     return prisma.cardPlan.findMany({
-      include: cardPlanInclude,
+      select: cardPlanListSelect,
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -51,14 +69,14 @@ class CardPlanRepository {
   async findById(id) {
     return prisma.cardPlan.findUnique({
       where: { id },
-      include: cardPlanInclude,
+      include: cardPlanDetailInclude,
     });
   }
 
   async findBySlug(slug) {
     return prisma.cardPlan.findUnique({
       where: { slug },
-      include: cardPlanInclude,
+      include: cardPlanDetailInclude,
     });
   }
 
@@ -74,7 +92,7 @@ class CardPlanRepository {
             }
           : undefined,
       },
-      include: cardPlanInclude,
+      include: cardPlanDetailInclude,
     });
   }
 
@@ -82,7 +100,7 @@ class CardPlanRepository {
     return prisma.cardPlan.update({
       where: { id: cardPlanId },
       data: { status },
-      include: cardPlanInclude,
+      include: cardPlanDetailInclude,
     });
   }
 
@@ -99,7 +117,7 @@ class CardPlanRepository {
             : {}),
         },
       },
-      include: cardPlanInclude,
+      include: cardPlanDetailInclude,
     });
   }
 

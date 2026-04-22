@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 
 const { generateAccessToken } = require('../../utils/tokens');
+const { AppError } = require('../../utils/app-error');
 
 function normalizeContactPayload(payload) {
   return {
@@ -63,6 +64,10 @@ class AuthService {
       const error = new Error('Invalid credentials');
       error.statusCode = 401;
       throw error;
+    }
+
+    if (user.status === 'DISABLED') {
+      throw new AppError('Account disabled', 403, 'ACCOUNT_DISABLED');
     }
 
     const isPasswordValid = await bcrypt.compare(payload.password, user.passwordHash);

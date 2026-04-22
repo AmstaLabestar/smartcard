@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { paginationQuerySchema } = require('../../utils/pagination');
 
 const phoneNumberSchema = z
   .string()
@@ -20,6 +21,12 @@ const createMerchantSchema = z
     path: ['email'],
   });
 
+const updateUserStatusSchema = z.object({
+  status: z.enum(['ACTIVE', 'DISABLED']),
+});
+
 module.exports = {
   createMerchantSchema,
+  updateUserStatusSchema,
+  userListQuerySchema: paginationQuerySchema,
 };

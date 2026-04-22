@@ -1,23 +1,25 @@
 const { createSuccessResponse } = require('../../utils/api-response');
 
 async function listUsers(req, res) {
-  const users = await req.container.userService.listUsers();
+  const users = await req.container.userService.listUsers(req.query);
 
   res.status(200).json(
     createSuccessResponse({
       message: 'Users fetched successfully',
-      data: users,
+      data: users.items,
+      meta: users.meta,
     }),
   );
 }
 
 async function listMerchants(req, res) {
-  const merchants = await req.container.userService.listMerchants();
+  const merchants = await req.container.userService.listMerchants(req.query);
 
   res.status(200).json(
     createSuccessResponse({
       message: 'Merchants fetched successfully',
-      data: merchants,
+      data: merchants.items,
+      meta: merchants.meta,
     }),
   );
 }
@@ -33,8 +35,24 @@ async function createMerchant(req, res) {
   );
 }
 
+async function updateUserStatus(req, res) {
+  const user = await req.container.userService.updateUserStatus({
+    requesterId: req.user.sub,
+    targetUserId: req.params.userId,
+    status: req.body.status,
+  });
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'User status updated successfully',
+      data: user,
+    }),
+  );
+}
+
 module.exports = {
   listUsers,
   listMerchants,
   createMerchant,
+  updateUserStatus,
 };

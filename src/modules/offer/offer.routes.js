@@ -5,7 +5,7 @@ const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
 const offerController = require('./offer.controller');
 const { buildOfferContainer } = require('./offer.container');
-const { createOfferSchema, updateOfferStatusSchema } = require('./offer.validation');
+const { createOfferSchema, offerListQuerySchema, updateOfferStatusSchema } = require('./offer.validation');
 
 const router = express.Router();
 
@@ -14,14 +14,23 @@ router.use((req, _res, next) => {
   next();
 });
 
-router.get('/', authMiddleware, asyncHandler(async (req, res) => offerController.listOffers(req, res)));
-router.get('/admin/all', authMiddleware, requireRole('ADMIN'), asyncHandler(async (req, res) => offerController.listAllOffers(req, res)));
+router.get('/', authMiddleware, asyncHandler(async (req, res) => {
+  req.query = validate(offerListQuerySchema, req.query);
+  return offerController.listOffers(req, res);
+}));
+router.get('/admin/all', authMiddleware, requireRole('ADMIN'), asyncHandler(async (req, res) => {
+  req.query = validate(offerListQuerySchema, req.query);
+  return offerController.listAllOffers(req, res);
+}));
 
 router.get(
   '/mine',
   authMiddleware,
   requireRole('MERCHANT', 'ADMIN'),
-  asyncHandler(async (req, res) => offerController.listMyOffers(req, res)),
+  asyncHandler(async (req, res) => {
+    req.query = validate(offerListQuerySchema, req.query);
+    return offerController.listMyOffers(req, res);
+  }),
 );
 
 router.post(
