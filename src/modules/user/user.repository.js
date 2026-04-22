@@ -23,6 +23,7 @@ class UserRepository {
       email: true,
       phoneNumber: true,
       role: true,
+      status: true,
       createdAt: true,
       updatedAt: true,
     };
@@ -53,6 +54,51 @@ class UserRepository {
         email: true,
         phoneNumber: true,
         role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  async findById(userId) {
+    return prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  async countUsersByRoleAndStatus({ role, status }) {
+    return prisma.user.count({
+      where: {
+        role,
+        status,
+      },
+    });
+  }
+
+  async updateUserStatusById(userId, status) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { status },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        role: true,
+        status: true,
         createdAt: true,
         updatedAt: true,
       },

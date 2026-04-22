@@ -21,7 +21,12 @@ const createMerchantSchema = z
     path: ['email'],
   });
 
+const updateUserStatusSchema = z.object({
+  status: z.enum(['ACTIVE', 'DISABLED']),
+});
+
 module.exports = {
   createMerchantSchema,
+  updateUserStatusSchema,
   userListQuerySchema: paginationQuerySchema,
 };

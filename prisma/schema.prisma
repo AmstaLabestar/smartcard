@@ -15,6 +15,7 @@ model User {
   firstName    String?
   lastName     String?
   role         UserRole      @default(USER)
+  status       UserStatus    @default(ACTIVE)
   cards        Card[]
   offers       Offer[]
   transactions Transaction[]
@@ -22,6 +23,7 @@ model User {
   updatedAt    DateTime      @updatedAt
 
   @@index([role])
+  @@index([status])
   @@index([createdAt])
 }
 
@@ -144,6 +146,11 @@ enum UserRole {
   USER
   MERCHANT
   ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
 }
 
 enum CardStatus {

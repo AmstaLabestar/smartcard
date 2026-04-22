@@ -5,7 +5,7 @@ const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
 const userController = require('./user.controller');
 const { buildUserContainer } = require('./user.container');
-const { createMerchantSchema, userListQuerySchema } = require('./user.validation');
+const { createMerchantSchema, updateUserStatusSchema, userListQuerySchema } = require('./user.validation');
 
 const router = express.Router();
 
@@ -30,6 +30,13 @@ router.post(
   asyncHandler(async (req, res) => {
     req.body = validate(createMerchantSchema, req.body);
     return userController.createMerchant(req, res);
+  }),
+);
+router.patch(
+  '/admin/:userId/status',
+  asyncHandler(async (req, res) => {
+    req.body = validate(updateUserStatusSchema, req.body);
+    return userController.updateUserStatus(req, res);
   }),
 );
 

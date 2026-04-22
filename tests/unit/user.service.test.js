@@ -57,5 +57,73 @@ module.exports = {
         );
       },
     },
+    {
+      name: 'updateUserStatus disables a merchant account',
+      run: async () => {
+        const service = new UserService({
+          userRepository: {
+            findById: async () => ({ id: 'merchant_1', role: 'MERCHANT', status: 'ACTIVE' }),
+            updateUserStatusById: async (userId, status) => ({ id: userId, status }),
+          },
+        });
+
+        const result = await service.updateUserStatus({
+          requesterId: 'admin_1',
+          targetUserId: 'merchant_1',
+          status: 'DISABLED',
+        });
+
+        assert.equal(result.status, 'DISABLED');
+      },
+    },
+    {
+      name: 'updateUserStatus rejects self disable for admins',
+      run: async () => {
+        const service = new UserService({
+          userRepository: {
+            findById: async () => ({ id: 'admin_1', role: 'ADMIN', status: 'ACTIVE' }),
+          },
+        });
+
+        await assert.rejects(
+          () =>
+            service.updateUserStatus({
+              requesterId: 'admin_1',
+              targetUserId: 'admin_1',
+              status: 'DISABLED',
+            }),
+          (error) => {
+            assert.ok(error instanceof AppError);
+            assert.equal(error.code, 'SELF_DISABLE_FORBIDDEN');
+            return true;
+          },
+        );
+      },
+    },
+    {
+      name: 'updateUserStatus rejects disabling the last active admin',
+      run: async () => {
+        const service = new UserService({
+          userRepository: {
+            findById: async () => ({ id: 'admin_2', role: 'ADMIN', status: 'ACTIVE' }),
+            countUsersByRoleAndStatus: async () => 1,
+          },
+        });
+
+        await assert.rejects(
+          () =>
+            service.updateUserStatus({
+              requesterId: 'admin_1',
+              targetUserId: 'admin_2',
+              status: 'DISABLED',
+            }),
+          (error) => {
+            assert.ok(error instanceof AppError);
+            assert.equal(error.code, 'LAST_ADMIN_DISABLE_FORBIDDEN');
+            return true;
+          },
+        );
+      },
+    },
   ],
 };

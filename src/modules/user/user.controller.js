@@ -35,8 +35,24 @@ async function createMerchant(req, res) {
   );
 }
 
+async function updateUserStatus(req, res) {
+  const user = await req.container.userService.updateUserStatus({
+    requesterId: req.user.sub,
+    targetUserId: req.params.userId,
+    status: req.body.status,
+  });
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'User status updated successfully',
+      data: user,
+    }),
+  );
+}
+
 module.exports = {
   listUsers,
   listMerchants,
   createMerchant,
+  updateUserStatus,
 };

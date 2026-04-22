@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 
 const { AuthService } = require('../../src/modules/auth/auth.service');
+const { AppError } = require('../../src/utils/app-error');
 
 module.exports = {
   name: 'AuthService',
@@ -38,6 +39,35 @@ module.exports = {
 
         assert.equal(createdUsers[0].role, 'USER');
         assert.equal(result.user.role, 'USER');
+      },
+    },
+    {
+      name: 'login rejects disabled accounts',
+      run: async () => {
+        const service = new AuthService({
+          authRepository: {
+            findByEmailOrPhoneNumber: async () => ({
+              id: 'user_1',
+              email: 'user@example.com',
+              passwordHash: 'hash',
+              role: 'USER',
+              status: 'DISABLED',
+            }),
+          },
+        });
+
+        await assert.rejects(
+          () =>
+            service.login({
+              email: 'user@example.com',
+              password: 'password123',
+            }),
+          (error) => {
+            assert.ok(error instanceof AppError);
+            assert.equal(error.code, 'ACCOUNT_DISABLED');
+            return true;
+          },
+        );
       },
     },
   ],
