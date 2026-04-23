@@ -1,5 +1,6 @@
 const { z } = require('zod');
 const { paginationQuerySchema } = require('../../utils/pagination');
+const { resetPasswordSchema } = require('../auth/auth.validation');
 
 const phoneNumberSchema = z
   .string()
@@ -28,5 +29,6 @@ const updateUserStatusSchema = z.object({
 module.exports = {
   createMerchantSchema,
   updateUserStatusSchema,
+  resetPasswordSchema,
   userListQuerySchema: paginationQuerySchema,
 };

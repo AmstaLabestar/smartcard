@@ -125,5 +125,29 @@ module.exports = {
         );
       },
     },
+    {
+      name: 'resetUserPassword updates the target user password',
+      run: async () => {
+        const updates = [];
+        const service = new UserService({
+          userRepository: {
+            findById: async () => ({ id: 'user_1', role: 'USER', status: 'ACTIVE' }),
+            updatePasswordById: async (userId, passwordHash) => {
+              updates.push({ userId, passwordHash });
+              return { id: userId };
+            },
+          },
+        });
+
+        await service.resetUserPassword({
+          targetUserId: 'user_1',
+          newPassword: 'newPassword123',
+        });
+
+        assert.equal(updates[0].userId, 'user_1');
+        assert.ok(updates[0].passwordHash);
+        assert.notEqual(updates[0].passwordHash, 'newPassword123');
+      },
+    },
   ],
 };

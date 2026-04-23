@@ -70,6 +70,17 @@ class UserService {
 
     return this.userRepository.updateUserStatusById(targetUserId, status);
   }
+
+  async resetUserPassword({ targetUserId, newPassword }) {
+    const user = await this.userRepository.findById(targetUserId);
+
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    return this.userRepository.updatePasswordById(targetUserId, passwordHash);
+  }
 }
 
 module.exports = { UserService };

@@ -2,8 +2,10 @@ const express = require('express');
 
 const { authMiddleware } = require('../../middlewares/auth.middleware');
 const { asyncHandler } = require('../../utils/async-handler');
+const { validate } = require('../../utils/validators');
 const meController = require('./me.controller');
 const { buildMeContainer } = require('./me.container');
+const { changePasswordSchema } = require('./me.validation');
 
 const router = express.Router();
 
@@ -18,5 +20,12 @@ router.get('/card', asyncHandler(async (req, res) => meController.getMyCard(req,
 router.get('/cards', asyncHandler(async (req, res) => meController.getMyCards(req, res)));
 router.get('/cards/active', asyncHandler(async (req, res) => meController.getMyActiveCard(req, res)));
 router.get('/transactions', asyncHandler(async (req, res) => meController.getMyTransactions(req, res)));
+router.patch(
+  '/password',
+  asyncHandler(async (req, res) => {
+    req.body = validate(changePasswordSchema, req.body);
+    return meController.changeMyPassword(req, res);
+  }),
+);
 
 module.exports = router;

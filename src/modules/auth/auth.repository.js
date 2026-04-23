@@ -26,6 +26,15 @@ class AuthRepository {
     return this.toPublicUser(user);
   }
 
+  async updatePasswordById(id, passwordHash) {
+    const user = await prisma.user.update({
+      where: { id },
+      data: { passwordHash },
+    });
+
+    return this.toPublicUser(user);
+  }
+
   toPublicUser(user) {
     const safeUser = { ...user };
     delete safeUser.passwordHash;
