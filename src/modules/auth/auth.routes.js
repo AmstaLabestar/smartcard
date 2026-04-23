@@ -3,7 +3,12 @@ const express = require('express');
 const { authMiddleware } = require('../../middlewares/auth.middleware');
 const { asyncHandler } = require('../../utils/async-handler');
 const { validate } = require('../../utils/validators');
-const { authRegisterSchema, authLoginSchema } = require('./auth.validation');
+const {
+  authRegisterSchema,
+  authLoginSchema,
+  forgotPasswordSchema,
+  performPasswordResetSchema,
+} = require('./auth.validation');
 const authController = require('./auth.controller');
 const { buildAuthContainer } = require('./auth.container');
 
@@ -27,6 +32,22 @@ router.post(
   asyncHandler(async (req, res) => {
     req.body = validate(authLoginSchema, req.body);
     return authController.login(req, res);
+  }),
+);
+
+router.post(
+  '/forgot-password',
+  asyncHandler(async (req, res) => {
+    req.body = validate(forgotPasswordSchema, req.body);
+    return authController.requestPasswordReset(req, res);
+  }),
+);
+
+router.post(
+  '/reset-password',
+  asyncHandler(async (req, res) => {
+    req.body = validate(performPasswordResetSchema, req.body);
+    return authController.resetPassword(req, res);
   }),
 );
 

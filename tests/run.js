@@ -1,10 +1,19 @@
 require('./setup-env');
 
+const fs = require('node:fs');
+const path = require('node:path');
+
+function loadSuites(directory) {
+  return fs
+    .readdirSync(directory, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.test.js'))
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .map((entry) => require(path.join(directory, entry.name)));
+}
+
 const suites = [
-  require('./unit/card.service.test'),
-  require('./unit/transaction.service.test'),
-  require('./unit/validators.test'),
-  require('./integration/app.integration.test'),
+  ...loadSuites(path.join(__dirname, 'unit')),
+  ...loadSuites(path.join(__dirname, 'integration')),
 ];
 
 const filter = process.argv[2] || 'all';

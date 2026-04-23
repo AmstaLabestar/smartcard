@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
+const nodeCrypto = require('node:crypto');
 
+const { env } = require('../../config/env');
 const { generateAccessToken } = require('../../utils/tokens');
 const { AppError } = require('../../utils/app-error');
 
@@ -12,8 +14,9 @@ function normalizeContactPayload(payload) {
 }
 
 class AuthService {
-  constructor({ authRepository }) {
+  constructor({ authRepository, passwordResetEmailService }) {
     this.authRepository = authRepository;
+    this.passwordResetEmailService = passwordResetEmailService;
   }
 
   async register(payload) {
@@ -99,6 +102,78 @@ class AuthService {
     }
 
     return this.authRepository.toPublicUser(user);
+  }
+
+  async requestPasswordReset({ email }) {
+    if (!this.passwordResetEmailService?.isConfigured()) {
+      throw new AppError(
+        'Password reset is unavailable right now',
+        503,
+        'EMAIL_NOT_CONFIGURED',
+      );
+    }
+
+    const normalizedEmail = email.trim();
+    const user = await this.authRepository.findByEmail(normalizedEmail);
+
+    if (!user || !user.email || !['USER', 'MERCHANT'].includes(user.role)) {
+      return {
+        acknowledged: true,
+      };
+    }
+
+    const rawToken = nodeCrypto.randomBytes(32).toString('hex');
+    const tokenHash = nodeCrypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(
+      Date.now() + env.PASSWORD_RESET_TOKEN_TTL_MINUTES * 60 * 1000,
+    );
+
+    await this.authRepository.deletePasswordResetTokensByUserId(user.id);
+    await this.authRepository.createPasswordResetToken({
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    });
+
+    await this.passwordResetEmailService.sendPasswordResetEmail({
+      email: user.email,
+      firstName: user.firstName,
+      token: rawToken,
+      expiresInMinutes: env.PASSWORD_RESET_TOKEN_TTL_MINUTES,
+    });
+
+    return {
+      acknowledged: true,
+    };
+  }
+
+  async resetPassword({ token, newPassword }) {
+    const tokenHash = nodeCrypto.createHash('sha256').update(token).digest('hex');
+    const passwordResetToken = await this.authRepository.findActivePasswordResetToken(tokenHash);
+
+    if (
+      !passwordResetToken
+      || !passwordResetToken.user
+      || !['USER', 'MERCHANT'].includes(passwordResetToken.user.role)
+    ) {
+      throw new AppError(
+        'Reset token is invalid or expired',
+        400,
+        'INVALID_PASSWORD_RESET_TOKEN',
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await this.authRepository.resetPasswordWithToken({
+      tokenId: passwordResetToken.id,
+      userId: passwordResetToken.userId,
+      passwordHash,
+    });
+
+    return {
+      acknowledged: true,
+    };
   }
 }
 

@@ -33,8 +33,36 @@ async function me(req, res) {
   );
 }
 
+async function requestPasswordReset(req, res) {
+  await req.container.authService.requestPasswordReset(req.body);
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'If this email belongs to a SmartCard account, a reset link has been sent',
+      data: {
+        acknowledged: true,
+      },
+    }),
+  );
+}
+
+async function resetPassword(req, res) {
+  await req.container.authService.resetPassword(req.body);
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Password reset successfully',
+      data: {
+        acknowledged: true,
+      },
+    }),
+  );
+}
+
 module.exports = {
   register,
   login,
   me,
+  requestPasswordReset,
+  resetPassword,
 };

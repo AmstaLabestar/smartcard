@@ -33,6 +33,15 @@ const authLoginSchema = z
 
 const passwordSchema = z.string().min(8).max(72);
 
+const forgotPasswordSchema = z.object({
+  email: z.string().trim().email(),
+});
+
+const performPasswordResetSchema = z.object({
+  token: z.string().trim().min(32).max(512),
+  newPassword: passwordSchema,
+});
+
 const resetPasswordSchema = z.object({
   newPassword: passwordSchema,
 });
@@ -41,5 +50,7 @@ module.exports = {
   authRegisterSchema,
   authLoginSchema,
   passwordSchema,
+  forgotPasswordSchema,
+  performPasswordResetSchema,
   resetPasswordSchema,
 };
