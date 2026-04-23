@@ -56,10 +56,26 @@ async function getMyTransactions(req, res) {
   );
 }
 
+async function changeMyPassword(req, res) {
+  await req.container.meService.changeCurrentUserPassword({
+    userId: req.user.sub,
+    currentPassword: req.body.currentPassword,
+    newPassword: req.body.newPassword,
+  });
+
+  res.status(200).json(
+    createSuccessResponse({
+      message: 'Password updated successfully',
+      data: null,
+    }),
+  );
+}
+
 module.exports = {
   getMe,
   getMyCard,
   getMyCards,
   getMyActiveCard,
   getMyTransactions,
+  changeMyPassword,
 };

@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 const { AppError } = require('../../utils/app-error');
 
 class MeService {
@@ -37,6 +39,23 @@ class MeService {
 
   async getCurrentUserTransactions(userId) {
     return this.transactionRepository.findTransactionsByUserId(userId);
+  }
+
+  async changeCurrentUserPassword({ userId, currentPassword, newPassword }) {
+    const user = await this.authRepository.findById(userId);
+
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+
+    if (!isPasswordValid) {
+      throw new AppError('Current password is incorrect', 400, 'INVALID_CURRENT_PASSWORD');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    return this.authRepository.updatePasswordById(userId, passwordHash);
   }
 }
 

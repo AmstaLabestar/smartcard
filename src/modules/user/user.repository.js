@@ -104,6 +104,24 @@ class UserRepository {
       },
     });
   }
+
+  async updatePasswordById(userId, passwordHash) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
 }
 
 module.exports = { UserRepository };

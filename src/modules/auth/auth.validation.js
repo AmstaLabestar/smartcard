@@ -31,7 +31,15 @@ const authLoginSchema = z
     path: ['email'],
   });
 
+const passwordSchema = z.string().min(8).max(72);
+
+const resetPasswordSchema = z.object({
+  newPassword: passwordSchema,
+});
+
 module.exports = {
   authRegisterSchema,
   authLoginSchema,
+  passwordSchema,
+  resetPasswordSchema,
 };
