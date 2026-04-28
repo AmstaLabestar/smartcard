@@ -18,6 +18,8 @@ model User {
   status       UserStatus    @default(ACTIVE)
   cards        Card[]
   offers       Offer[]
+  purchaseRequests PurchaseRequest[] @relation("PurchaseRequester")
+  reviewedPurchaseRequests PurchaseRequest[] @relation("PurchaseReviewer")
   transactions Transaction[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -47,6 +49,7 @@ model Card {
   ownerId                  String
   owner                    User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   offerAccesses            CardOfferAccess[]
+  purchaseRequest          PurchaseRequest? @relation("IssuedPurchaseRequest")
   transactions             Transaction[]
   createdAt                DateTime         @default(now())
   updatedAt                DateTime         @updatedAt
@@ -67,8 +70,33 @@ model CardPlan {
   status              CardPlanStatus @default(DRAFT)
   cards               Card[]
   offerLinks          CardPlanOffer[]
+  purchaseRequests    PurchaseRequest[]
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
+}
+
+model PurchaseRequest {
+  id              String                @id @default(uuid())
+  userId          String
+  cardPlanId      String
+  status          PurchaseRequestStatus @default(PENDING)
+  note            String?
+  rejectionReason String?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  issuedCardId    String?               @unique
+  user            User                  @relation("PurchaseRequester", fields: [userId], references: [id], onDelete: Cascade)
+  reviewedBy      User?                 @relation("PurchaseReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  cardPlan        CardPlan              @relation(fields: [cardPlanId], references: [id], onDelete: Cascade)
+  issuedCard      Card?                 @relation("IssuedPurchaseRequest", fields: [issuedCardId], references: [id], onDelete: SetNull)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([userId])
+  @@index([cardPlanId])
+  @@index([status])
+  @@index([reviewedById])
+  @@index([createdAt])
 }
 
 model CardPlanOffer {
@@ -183,4 +211,10 @@ enum TransactionStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+enum PurchaseRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
