@@ -12,17 +12,17 @@ class CardService {
     this.cardRepository = cardRepository;
   }
 
-  async purchaseCard({ ownerId, payload }) {
+  async issueCardPlanToOwner({ ownerId, cardPlanId }) {
     const existingCardForPlan = await this.cardRepository.findOwnedCardByPlan({
       ownerId,
-      cardPlanId: payload.cardPlanId,
+      cardPlanId,
     });
 
     if (existingCardForPlan) {
       throw new AppError('User already owns this card plan', 409, 'CARD_PLAN_ALREADY_OWNED');
     }
 
-    const cardPlan = await this.cardRepository.findActiveCardPlanById(payload.cardPlanId);
+    const cardPlan = await this.cardRepository.findActiveCardPlanById(cardPlanId);
 
     if (!cardPlan) {
       throw new AppError('Card plan not found or inactive', 404, 'CARD_PLAN_NOT_FOUND');
@@ -48,6 +48,13 @@ class CardService {
 
     // A purchased card becomes the user's current card immediately.
     return this.cardRepository.activateCardForOwner({ ownerId, cardId: card.id });
+  }
+
+  async purchaseCard({ ownerId, payload }) {
+    return this.issueCardPlanToOwner({
+      ownerId,
+      cardPlanId: payload.cardPlanId,
+    });
   }
 
   async activateCardByActivationCode({ ownerId, activationCode }) {

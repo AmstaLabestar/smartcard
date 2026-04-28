@@ -2,6 +2,7 @@ require('./setup-env');
 
 const suites = [
   require('./unit/card.service.test'),
+  require('./unit/purchase-request.service.test'),
   require('./unit/transaction.service.test'),
   require('./unit/validators.test'),
   require('./integration/app.integration.test'),

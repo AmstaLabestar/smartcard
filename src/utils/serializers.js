@@ -108,10 +108,41 @@ function sanitizeTransaction(transaction) {
   };
 }
 
+function sanitizePurchaseRequest(purchaseRequest) {
+  if (!purchaseRequest) return null;
+
+  return {
+    id: purchaseRequest.id,
+    status: purchaseRequest.status,
+    note: purchaseRequest.note,
+    rejectionReason: purchaseRequest.rejectionReason,
+    reviewedAt: purchaseRequest.reviewedAt,
+    createdAt: purchaseRequest.createdAt,
+    updatedAt: purchaseRequest.updatedAt,
+    ...(purchaseRequest.user && { user: sanitizeUser(purchaseRequest.user) }),
+    ...(purchaseRequest.reviewedBy && { reviewedBy: sanitizeUser(purchaseRequest.reviewedBy) }),
+    ...(purchaseRequest.cardPlan && {
+      cardPlan: {
+        id: purchaseRequest.cardPlan.id,
+        name: purchaseRequest.cardPlan.name,
+        slug: purchaseRequest.cardPlan.slug,
+        description: purchaseRequest.cardPlan.description,
+        marketingHighlights: purchaseRequest.cardPlan.marketingHighlights,
+        price: purchaseRequest.cardPlan.price,
+        status: purchaseRequest.cardPlan.status,
+        createdAt: purchaseRequest.cardPlan.createdAt,
+        updatedAt: purchaseRequest.cardPlan.updatedAt,
+      },
+    }),
+    ...(purchaseRequest.issuedCard && { issuedCard: sanitizeCard(purchaseRequest.issuedCard) }),
+  };
+}
+
 module.exports = {
   sanitizeUser,
   sanitizeCardPlan,
   sanitizeCard,
   sanitizeOffer,
   sanitizeTransaction,
+  sanitizePurchaseRequest,
 };
