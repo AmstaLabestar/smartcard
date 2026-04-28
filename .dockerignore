@@ -10,4 +10,3 @@ dist
 tests
 postman
 generated
-prisma/migrations
